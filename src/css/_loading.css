@@ -1,0 +1,25 @@
+#_loading_screen {
+    position: fixed;
+    width: 100svw;
+    height: 100svh;
+    background-color: var(--loading-screen-background);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 500ms;
+}
+
+#_loading_logo {
+    width: 256px;
+    aspect-ratio: 1 / 1;
+}
+
+#_loading_bar {
+    height: 256px;
+    aspect-ratio: 1 / 1;
+    transform: scale(0.75);
+}
+
+#_loading_logo_bg {
+    fill: var(--loading-screen-background);
+}
