@@ -111,14 +111,8 @@ export function lerp(startValue, endValue, interpolation) {
     return startValue + (endValue - startValue) * interpolation;
 }
 export function lerpAngle(startAngle, endAngle, interpolation) {
-    startAngle = startAngle % 360;
-    endAngle = endAngle % 360;
-    let angleDiff = endAngle - startAngle;
-    if (Math.abs(angleDiff) > 180) {
-        angleDiff = (angleDiff + 360) % 360 - 180;
-    }
-    const interpolatedAngle = startAngle + interpolation * angleDiff;
-    return interpolatedAngle % 360;
+    let difference = ((endAngle - startAngle + 180) % 360) - 180;
+    return startAngle + difference * interpolation;
 }
 export function shakeScreen(intensity, duration) {
     if (!global._shakingScreen) {

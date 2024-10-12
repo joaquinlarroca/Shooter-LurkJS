@@ -121,10 +121,10 @@ window.addEventListener("fixedUpdate", () => {
         ui.weapon_selector.update()
     }
     if (keyPressed("n")) {
-        time.scale = lerp(time.scale, 0.5, (1 ** time.fixedDeltaTime) * 0.1 )
+        time.scale = lerp(time.scale, 0.5, (1 ** time.fixedDeltaTime) * 0.1)
     }
-    else{
-        time.scale = lerp(time.scale, 1, (1 ** time.fixedDeltaTime) * 0.1 )
+    else if (!ui.weapon_selector.active) {
+        time.scale = lerp(time.scale, 1, (1 ** time.fixedDeltaTime) * 0.1)
     }
 
 
@@ -135,26 +135,26 @@ window.addEventListener("fixedUpdate", () => {
         map.currentVelocity = map.velocity;
     }
     if (map.vector.x == 1) {
-        map.vel.x -= map.currentVelocity * time.fixedDeltaTime;
+        map.vel.x -= map.currentVelocity * time.fixedDeltaTime * time.scale;
     }
     if (map.vector.x == -1) {
-        map.vel.x += map.currentVelocity * time.fixedDeltaTime;
+        map.vel.x += map.currentVelocity * time.fixedDeltaTime * time.scale;
     }
 
     if (map.vector.y == 1) {
-        map.vel.y -= map.currentVelocity * time.fixedDeltaTime;
+        map.vel.y -= map.currentVelocity * time.fixedDeltaTime * time.scale;
     }
 
     if (map.vector.y == -1) {
-        map.vel.y += map.currentVelocity * time.fixedDeltaTime;
+        map.vel.y += map.currentVelocity * time.fixedDeltaTime * time.scale;
     }
 
 
     map.vel.x *= Math.pow(0.07, time.fixedDeltaTime);
     map.vel.y *= Math.pow(0.07, time.fixedDeltaTime);
 
-    map.x += map.vel.x * time.fixedDeltaTime;
-    map.y += map.vel.y * time.fixedDeltaTime;
+    map.x += map.vel.x * time.fixedDeltaTime * time.scale;
+    map.y += map.vel.y * time.fixedDeltaTime * time.scale;
 
     map.x = Math.round(Math.max(Math.min(map.x, map.max.x), map.min.x));
     map.y = Math.round(Math.max(Math.min(map.y, map.max.y), map.min.y));

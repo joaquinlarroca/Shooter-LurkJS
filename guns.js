@@ -174,7 +174,7 @@ export function gunUpdate() {
             gun.scale = [1, 1]
         }
     }
-    gun.angle = lerpAngle(gun.angle, player.angle - gunReloadAngle * gun.scale[1], (1 ** time.fixedDeltaTime) * 0.7 * time.scale)
+    gun.angle = lerpAngle(gun.angle, player.angle - gunReloadAngle * gun.scale[1], (1 ** time.fixedDeltaTime) * time.scale)
 }
 export function reload(gunType) {
     if (!gun.reloading) {
