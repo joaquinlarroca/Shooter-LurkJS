@@ -91,7 +91,7 @@ window.addEventListener("update", () => {
     drawtext(`${gun.mag.current}/${gun.mag.max}`, [1690, 970], 24, "monospace", "top", "end", 0, 1.0)
     ctx.fillStyle = "rgba(255,255,255,1)"
     drawtext(`${gun.equiped}`, [1702, 970], 24, "monospace", "top", "start", 0, 1.0)
-    drawtext(`BULLETS: ${bullets.length}`, [1624, 994], 24, "monospace", "top", "start", 0, 1.0)
+    drawtext(`BULLETS: ${bullets.length} ${gun.angle}`, [1624, 994], 24, "monospace", "top", "start", 0, 1.0)
 
     if (keyPressed("q") || ui.weapon_selector.active) {
         ui.weapon_selector.draw()
@@ -119,6 +119,12 @@ window.addEventListener("fixedUpdate", () => {
     }
     if (keyPressed("q") || ui.weapon_selector.active) {
         ui.weapon_selector.update()
+    }
+    if (keyPressed("n")) {
+        time.scale = lerp(time.scale, 0.5, (1 ** time.fixedDeltaTime) * 0.1 )
+    }
+    else{
+        time.scale = lerp(time.scale, 1, (1 ** time.fixedDeltaTime) * 0.1 )
     }
 
 

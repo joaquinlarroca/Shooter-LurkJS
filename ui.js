@@ -23,7 +23,6 @@ export const ui = {
             ctx.fillStyle = "rgba(24,24,24,0.8)"
             ctx.fillRect(this.x, this.y - this.space, (this.size * this.width) + this.space, this.height + this.space * 2)
             Object.keys(gun.types).forEach((key, i) => {
-                let weapon = gun.types[key]
                 ctx.fillStyle = "rgba(255,255,255,0.1)"
                 ctx.fillRect(
                     this.x + this.space + (i * this.size),
@@ -31,16 +30,7 @@ export const ui = {
                     this.size - this.space,
                     this.height)
                 ctx.fillStyle = "rgba(255,255,255,0.8)"
-                drawtext(key,
-                    [this.x + (i * this.size) + this.space + this.size / 2 - this.space,
-                    this.y + this.height / 2],
-                    this.size / 10,
-                    "monospace",
-                    "top",
-                    "center",
-                    0,
-                    1.0
-                )
+                drawtext(key, [this.x + (i * this.size) + this.space + this.size / 2 - this.space, this.y + this.height / 2], this.size / 10, "monospace", "top", "center", 0, 1.0)
 
             })
         },
@@ -48,6 +38,7 @@ export const ui = {
             if (!this.active) {
                 this.width = Object.keys(gun.types).length
                 this.active = true
+                time.scale = 0;
             }
             this.hitboxes = []
             Object.keys(gun.types).forEach((key, i) => {
@@ -60,6 +51,7 @@ export const ui = {
                 if (isClicking(hitbox, true)) {
                     switchGun(key);
                     this.active = false
+                    time.scale = 1;
                 }
             })
         }

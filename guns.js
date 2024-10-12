@@ -2,7 +2,7 @@ import { global, screen, ctx, canvas, time, image } from "./src/js/main.js";
 import { drawPointers, isClicking, isHovering, keyPressed, mouse, pointers } from "./src/js/listeners.js";
 import { button, camera, hitbox, hitboxCircleFixed, hitboxFixed, object, slider, sliderv, sound2, sound } from "./src/js/classes.js";
 import { loadFont, loadImage, loadSound } from "./src/js/loader.js";
-import { setup, clear, drawtext, shakeScreen, lerp } from "./src/js/functions.js";
+import { setup, clear, drawtext, shakeScreen, lerp, lerpAngle } from "./src/js/functions.js";
 import { player } from "./player.js";
 import { map } from "./map.js";
 import { ui } from "./ui.js";
@@ -159,21 +159,22 @@ export function gunUpdate() {
     gun.mag.current = Math.min(gun.mag.max, gun.mag.current)
 
     gunMove = gun.types[gun.equiped].move - gun.recoil
-    gunReloadAngle = lerp(gunReloadAngle, gun.reloading * 25, (1 ** time.fixedDeltaTime) * 0.1)
+    gunReloadAngle = lerp(gunReloadAngle, gun.reloading * 25, (1 ** time.fixedDeltaTime) * 0.1 * time.scale)
 
-    gun.recoil = lerp(gun.recoil + gunReloadAngle / 7, 0, (1 ** time.fixedDeltaTime) * 0.25)
-    gun.width = lerp(gun.width, gun.types[gun.equiped].size.width, (1 ** time.fixedDeltaTime) * 0.25)
-    gun.height = lerp(gun.height, gun.types[gun.equiped].size.height, (1 ** time.fixedDeltaTime) * 0.1)
+    gun.recoil = lerp(gun.recoil + gunReloadAngle / 7, 0, (1 ** time.fixedDeltaTime) * 0.25 * time.scale)
+    gun.width = lerp(gun.width, gun.types[gun.equiped].size.width, (1 ** time.fixedDeltaTime) * 0.25 * time.scale)
+    gun.height = lerp(gun.height, gun.types[gun.equiped].size.height, (1 ** time.fixedDeltaTime) * 0.1 * time.scale)
 
 
-
-    if (player.angle < -90 || player.angle > 90) {
-        gun.scale = [1, -1]
+    if (time.scale > 0) {
+        if (player.angle < -90 || player.angle > 90) {
+            gun.scale = [1, -1]
+        }
+        else {
+            gun.scale = [1, 1]
+        }
     }
-    else {
-        gun.scale = [1, 1]
-    }
-    gun.angle = player.angle - gunReloadAngle * gun.scale[1]
+    gun.angle = lerpAngle(gun.angle, player.angle - gunReloadAngle * gun.scale[1], (1 ** time.fixedDeltaTime) * 0.7 * time.scale)
 }
 export function reload(gunType) {
     if (!gun.reloading) {
@@ -224,6 +225,7 @@ export function shoot(gunType, direction) {
                 if (gun.canShoot && bullets.length < 500) {
                     gun.mag.current -= 1
                     gun.canShoot = false
+                    gun.types[gunType].sound.playbackRate = Math.min(Math.max(time.scale, 0.75), 1.25)
                     gun.types[gunType].sound.play()
 
                     for (let i = 0; i < gun.types[gunType].bullet_count; i++) {
