@@ -5,11 +5,14 @@ import { loadFont, loadImage, loadSound } from "./src/js/loader.js";
 import { setup, clear, drawtext, shakeScreen, lerp } from "./src/js/functions.js";
 import { player } from "./player.js";
 import { map } from "./map.js";
+import { ui } from "./ui.js";
 
 
-await loadImage("src/images/guns/howa.png", "gun");
+await loadImage("src/images/guns/rifle.png", "rifle");
 await loadImage("src/images/guns/shotgun.png", "shotgun");
 await loadImage("src/images/guns/revolver.png", "revolver");
+await loadImage("src/images/guns/p90.png", "p90");
+await loadImage("src/images/guns/silenced_pistol.png", "silenced_pistol");
 
 await loadSound("./src/sounds/rifle.wav", "gun");
 await loadSound("./src/sounds/shotgun.wav", "shotgun");
@@ -20,7 +23,7 @@ await loadImage("src/images/bullets/small.png", "smallbullet");
 
 export let gun = new object(image["gun"], [0, 0], [100, 32]);
 gun.switching = false;
-gun.equiped = "AR_15"; // ARMA EQUIPADA
+gun.equiped = "revolver"; // ARMA EQUIPADA
 gun.mag = {
     max: 5,
     current: 500
@@ -45,8 +48,8 @@ gun.bullet_types = {
 
 }
 gun.types = {
-    "AR_15": {
-        image: image["gun"],
+    "rifle": {
+        image: image["rifle"],
         switch_time: 250,
         bullet_type: "medium",
         moving_angle_multiplier: 25,
@@ -58,51 +61,71 @@ gun.types = {
         hold_shot: true,
         mag_size: 25,
         reload_time: 1000,
-        move: 48,
+        move: 60,
         dispersion: 5,
         time: 100,
         bullet_count: 1,
         recoil: 3,
         sound: new sound2("./src/sounds/rifle.wav", 1, 1)
     },
-    "shotgun_A": {
+    "shotgun": {
         image: image["shotgun"],
         switch_time: 250,
         bullet_type: "shell",
-        moving_angle_multiplier: 5,
+        moving_angle_multiplier: 3,
         size: {
-            width: 145,
+            width: 118,
             height: 48
         },
         damage: 10,
         hold_shot: false,
         mag_size: 5,
-        reload_time: 1000,
-        move: 48,
-        dispersion: 20,
+        reload_time: 1250,
+        move: 55,
+        dispersion: 15,
         time: 750,
         bullet_count: 3,
         recoil: 6,
         sound: new sound2("./src/sounds/shotgun.wav", 1, 0.5)
     },
-    "minigun": {
-        image: image["revolver"],
-        switch_time: 500,
+    "p90": {
+        image: image["p90"],
+        switch_time: 300,
         bullet_type: "small",
-        moving_angle_multiplier: 15,
+        moving_angle_multiplier: 2,
         size: {
-            width: 100,
+            width: 80,
             height: 48
         },
         damage: 8,
         hold_shot: true,
-        mag_size: 50,
-        reload_time: 2500,
-        move: 48,
-        dispersion: 16,
+        mag_size: 20,
+        reload_time: 1200,
+        move: 52,
+        dispersion: 10,
         time: 50,
         bullet_count: 1,
-        recoil: 4,
+        recoil: 8,
+        sound: new sound2("./src/sounds/rifle.wav", 1, 1)
+    },
+    "revolver": {
+        image: image["revolver"],
+        switch_time: 300,
+        bullet_type: "medium",
+        moving_angle_multiplier: 2,
+        size: {
+            width: 80,
+            height: 48
+        },
+        damage: 8,
+        hold_shot: true,
+        mag_size: 4,
+        reload_time: 800,
+        move: 65,
+        dispersion: 5,
+        time: 750,
+        bullet_count: 1,
+        recoil: 8,
         sound: new sound2("./src/sounds/rifle.wav", 1, 1)
     },
 }
@@ -135,14 +158,22 @@ export function gunUpdate() {
     gun.mag.max = gun.types[gun.equiped].mag_size
     gun.mag.current = Math.min(gun.mag.max, gun.mag.current)
 
-    gunMove = gun.width / 2 + 10 - gun.recoil
+    gunMove = gun.types[gun.equiped].move - gun.recoil
     gunReloadAngle = lerp(gunReloadAngle, gun.reloading * 25, (1 ** time.fixedDeltaTime) * 0.1)
 
-    gun.recoil = lerp(gun.recoil + gunReloadAngle/7, 0, (1 ** time.fixedDeltaTime) * 0.1)
-    gun.width = lerp(gun.width, gun.types[gun.equiped].size.width, (1 ** time.fixedDeltaTime) * 0.1)
+    gun.recoil = lerp(gun.recoil + gunReloadAngle / 7, 0, (1 ** time.fixedDeltaTime) * 0.25)
+    gun.width = lerp(gun.width, gun.types[gun.equiped].size.width, (1 ** time.fixedDeltaTime) * 0.25)
     gun.height = lerp(gun.height, gun.types[gun.equiped].size.height, (1 ** time.fixedDeltaTime) * 0.1)
-    
-    gun.angle = player.angle + gunReloadAngle
+
+
+
+    if (player.angle < -90 || player.angle > 90) {
+        gun.scale = [1, -1]
+    }
+    else {
+        gun.scale = [1, 1]
+    }
+    gun.angle = player.angle - gunReloadAngle * gun.scale[1]
 }
 export function reload(gunType) {
     if (!gun.reloading) {
@@ -188,7 +219,7 @@ export function switchGun(switchto) {
 }
 export function shoot(gunType, direction) {
     if (time.scale > 0.1) {
-        if (!gun.switching) {
+        if (!gun.switching && gunReloadAngle < 5 && !ui.weapon_selector.active) {
             if (gun.mag.current > 0 && !gun.reloading) {
                 if (gun.canShoot && bullets.length < 500) {
                     gun.mag.current -= 1
@@ -228,8 +259,8 @@ export function shoot(gunType, direction) {
                         gunDir = gunDir * (Math.PI / 180);
                         bullet.angle = direction
                         bullet.move(gun.types[gunType].size.width)
-                        bullet.vel.x = Math.cos(gunDir) * 2000
-                        bullet.vel.y = Math.sin(gunDir) * 2000
+                        bullet.vel.x = Math.cos(gunDir) * 2000 + map.vel.x
+                        bullet.vel.y = Math.sin(gunDir) * 2000 + map.vel.y
                         gun.recoil += gun.types[gunType].recoil
 
                         bullets.push(bullet)
