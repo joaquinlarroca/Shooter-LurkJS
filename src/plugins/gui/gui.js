@@ -123,14 +123,11 @@ if (!info.config.open_on_start) {
     gui.debug_tab_downarrow.style.transform = "rotate(180deg)";
 }
 
-window.addEventListener("newPlugin", () => {
+gui.debug_tab.onclick = () => {
     gui.middle_container.content.innerHTML = "";
     global._plugins.forEach(plugin => {
         gui.middle_container.content.appendChild(new gui.plugin_display(plugin).plugin);
     });
-})
-
-gui.debug_tab.onclick = () => {
     check_to_disable();
     if (gui.debug_container.style.display == "none") {
         gui.debug_container.style.display = "flex";

@@ -16,12 +16,15 @@ await loadImage("src/images/guns/silenced_pistol.png", "silenced_pistol");
 
 await loadSound("./src/sounds/rifle.wav", "gun");
 await loadSound("./src/sounds/shotgun.wav", "shotgun");
+await loadSound("./src/sounds/p90.wav", "p90");
 
 await loadImage("src/images/bullets/shell.png", "shellbullet");
 await loadImage("src/images/bullets/medium.png", "mediumbullet");
 await loadImage("src/images/bullets/small.png", "smallbullet");
 
 export let gun = new object(image["gun"], [0, 0], [100, 32]);
+let dvd = new sound("./src/sounds/rifle.wav", 1, 1, true);
+dvd.play()
 gun.switching = false;
 gun.equiped = "revolver"; // ARMA EQUIPADA
 gun.mag = {
@@ -106,7 +109,7 @@ gun.types = {
         time: 50,
         bullet_count: 1,
         recoil: 8,
-        sound: new sound2("./src/sounds/rifle.wav", 1, 1)
+        sound: new sound2("./src/sounds/p90.wav", 1, 1)
     },
     "revolver": {
         image: image["revolver"],
@@ -127,6 +130,26 @@ gun.types = {
         bullet_count: 1,
         recoil: 8,
         sound: new sound2("./src/sounds/rifle.wav", 1, 1)
+    },
+    "test": {
+        image: image["silenced_pistol"],
+        switch_time: 300,
+        bullet_type: "small",
+        moving_angle_multiplier: 18,
+        size: {
+            width: 64,
+            height: 32
+        },
+        damage: 80,
+        hold_shot: true,
+        mag_size: 99,
+        reload_time: 1,
+        move: 65,
+        dispersion: 15,
+        time: 20,
+        bullet_count: 3,
+        recoil: 8,
+        sound: new sound2("./src/sounds/p90.wav", 1, 0.1)
     },
 }
 
@@ -157,16 +180,16 @@ export function gunUpdate() {
     bullets = bullets.filter(bullet => bullet.toDelete == false)
     gun.mag.max = gun.types[gun.equiped].mag_size
     gun.mag.current = Math.min(gun.mag.max, gun.mag.current)
-
-    gunMove = gun.types[gun.equiped].move - gun.recoil
-    gunReloadAngle = lerp(gunReloadAngle, gun.reloading * 25, (1 ** time.fixedDeltaTime) * 0.1 * time.scale)
-
-    gun.recoil = lerp(gun.recoil + gunReloadAngle / 7, 0, (1 ** time.fixedDeltaTime) * 0.25 * time.scale)
-    gun.width = lerp(gun.width, gun.types[gun.equiped].size.width, (1 ** time.fixedDeltaTime) * 0.25 * time.scale)
-    gun.height = lerp(gun.height, gun.types[gun.equiped].size.height, (1 ** time.fixedDeltaTime) * 0.1 * time.scale)
-
-
     if (time.scale > 0) {
+        gunMove = gun.types[gun.equiped].move - gun.recoil
+        gunReloadAngle = lerp(gunReloadAngle, gun.reloading * 25, (1 ** time.fixedDeltaTime) * 0.1 * time.scale)
+
+        gun.recoil = lerp(gun.recoil + gunReloadAngle / 7, 0, (1 ** time.fixedDeltaTime) * 0.25 * time.scale)
+        gun.width = lerp(gun.width, gun.types[gun.equiped].size.width, (1 ** time.fixedDeltaTime) * 0.25 * time.scale)
+        gun.height = lerp(gun.height, gun.types[gun.equiped].size.height, (1 ** time.fixedDeltaTime) * 0.1 * time.scale)
+
+
+
         if (player.angle < -90 || player.angle > 90) {
             gun.scale = [1, -1]
         }
@@ -234,7 +257,7 @@ export function shoot(gunType, direction) {
                             [player.x + player.halfheight + map.x, player.y + player.halfheight + map.y],
                             [gun.bullet_types[gun.types[gunType].bullet_type].width, gun.bullet_types[gun.types[gunType].bullet_type].height]
                         )
-
+                        bullet.type = gun.types[gunType].bullet_type
                         bullet.vel = { x: 0, y: 0 }
                         let startTime = Date.now();
                         let interval = setInterval(() => {
@@ -246,11 +269,11 @@ export function shoot(gunType, direction) {
                             }
                         }, 10);
 
-                        var moving_factor_x = map.vel.x / (map.currentVelocity * time.deltaTime * time.scale)
-                        var moving_factor_y = map.vel.y / (map.currentVelocity * time.deltaTime * time.scale)
+                        var moving_factor_x = map.vel.x / (map.currentVelocity * time.fixedDeltaTime * time.scale)
+                        var moving_factor_y = map.vel.y / (map.currentVelocity * time.fixedDeltaTime * time.scale)
                         moving_factor_x = Math.abs(Math.min(Math.max(moving_factor_x, -1), 1))
                         moving_factor_y = Math.abs(Math.min(Math.max(moving_factor_y, -1), 1))
-                        var moving_factor = gun.types[gunType].moving_angle_multiplier * (moving_factor_x + moving_factor_y) / 2
+                        var moving_factor = gun.types[gunType].moving_angle_multiplier * ((moving_factor_x + moving_factor_y) / 2)
 
 
                         bullet.x -= bullet.halfwidth

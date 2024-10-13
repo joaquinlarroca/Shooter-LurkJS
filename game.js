@@ -9,11 +9,10 @@ import { ParticleGenerator } from "./src/plugins/particles/particles.js";
 
 import { bullets, gun, gunDraw, gunUpdate, shoot, reload, switchGun, drawBullets, updateBullets } from "./guns.js"
 
-import "./src/plugins/gui/gui.js"
+//import "./src/plugins/gui/gui.js"
 import { ui } from "./ui.js";
-
-await loadImage("src/images/map.png", "fondo1");
-
+import { chunker, chunker_config } from "./chunker.js";
+import { bullet_decay, drawBulletDecay, updateEntities } from "./entities.js";
 
 await setup(1920, 1080, 0.99, 60);
 
@@ -51,82 +50,136 @@ window.addEventListener("update", () => {
     ctx.translate(-map.x, -map.y)
 
     partGen.draw()
+    drawBulletDecay()
 
     ctx.restore()
     // #############
     // END
     // #############
 
-    ctx.fillStyle = "rgba(24,24,24,0.8)"
-    ctx.fillRect(1616, 952, 304, 128)
+    chunker.drawChunkHitbox()
+    chunker.drawChunk()
 
-    ctx.fillStyle = "rgba(64,64,64,0.8)"
-    for (let i = 0; i < gun.mag.max - gun.mag.current; i++) {
-        ctx.save()
-        ctx.beginPath();
-        ctx.roundRect(1624 + (i * (290 / gun.mag.max)) + (290 / gun.mag.max) * gun.mag.current, 960, (290 / gun.mag.max) / 2, 8, 2);
-        ctx.clip()
-        ctx.closePath()
-        ctx.fillRect(1624 + (i * (290 / gun.mag.max)), 960, (290 / gun.mag.max) / 2, 8)
-        ctx.fill();
-        ctx.restore()
-    }
-    if (gun.reloading) {
-        ctx.fillStyle = "rgba(255,100,100,1)"
-    }
-    else {
-        ctx.fillStyle = "rgba(255,255,255,1)"
-    }
-    for (let i = 0; i < gun.mag.current; i++) {
-        ctx.save()
-        ctx.beginPath();
-        ctx.roundRect(1624 + (i * (290 / gun.mag.max)), 960, (290 / gun.mag.max) / 2, 8, 2);
-        ctx.clip()
-        ctx.closePath()
-        ctx.fillRect(1624 + (i * (290 / gun.mag.max)), 960, (290 / gun.mag.max) / 2, 8)
-        ctx.fill();
-        ctx.restore()
-    }
-
-    drawtext(`${gun.mag.current}/${gun.mag.max}`, [1690, 970], 24, "monospace", "top", "end", 0, 1.0)
-    ctx.fillStyle = "rgba(255,255,255,1)"
-    drawtext(`${gun.equiped}`, [1702, 970], 24, "monospace", "top", "start", 0, 1.0)
-    drawtext(`BULLETS: ${bullets.length} ${gun.angle}`, [1624, 994], 24, "monospace", "top", "start", 0, 1.0)
+    ui.weapon_info.draw()
 
     if (keyPressed("q") || ui.weapon_selector.active) {
         ui.weapon_selector.draw()
     }
-
-    drawtext((map.x + mouse.x).toFixed(0) + ", " + (map.y + mouse.y).toFixed(0), [0, 0], 24, "sans-serif", "top", "start", 0, 1.0)
+    drawtext(chunker.chunk.trunc.x + ", " + chunker.chunk.trunc.y, [0, 24], 24, "sans-serif", "top", "start", 0, 1.0)
+    drawtext(map.x.toFixed(0) + ", " + map.y.toFixed(0), [0, 0], 24, "sans-serif", "top", "start", 0, 1.0)
 });
 
 window.addEventListener("fixedUpdate", () => {
 
+    // ############################
+    //CHUNKER
+    // ############################
+    chunker.updatePos()
+    chunker.updateHitboxes()
+    if (chunker.exists(chunker.chunk.trunc.x, chunker.chunk.trunc.y) == true) {
+        chunker.updateActiveChunks()
+        for (let i = 0; i < chunker.activeChunks.length; i++) {
+            var y = chunker.activeChunks[i][0]
+            var x = chunker.activeChunks[i][1]
+
+            for (let l = 0; l < chunker_config["maps"][chunker.map][y][x].length; l++) {
+                const hitbox = chunker_config["maps"][chunker.map][y][x][l];
+                // BULLET COLLISION
+                bullets.forEach((bullet, index) => {
+                    bullet.x -= map.x
+                    bullet.y -= map.y
+                    let hitted = false
+                    let per = 0
+                    let savedPOS = [0, 0]
+                    const closestX = Math.min(Math.max(bullet.x, hitbox.x), hitbox.x + hitbox.width);
+                    const closestY = Math.min(Math.max(bullet.y, hitbox.y), hitbox.y + hitbox.height);
+                    const distanceX = Math.abs(bullet.x - closestX);
+                    const distanceY = Math.abs(bullet.y - closestY);
+                    if (distanceX <= bullet.width / 2 && distanceY <= bullet.height / 2) {
+                        hitted = true
+                        savedPOS = [bullet.x, bullet.y]
+                        bullet.vel.x = 0
+                        bullet.vel.y = 0
+                        bullets.splice(index, 1)
+                        bullet.toDelete = true
+                        new bullet_decay(image[`${bullet.type}bullet`], savedPOS[0], savedPOS[1], bullet.width, bullet.height, bullet.angle)
+                    }
+
+                    bullet.x += map.x
+                    bullet.y += map.y
+                })
+                // PLAYER COLLISION
+                const dir = {
+                    x: Math.sign((hitbox.x + hitbox.width / 2) - player.x - player.halfwidth),
+                    y: Math.sign((hitbox.y + hitbox.height / 2) - player.y - player.halfheight)
+                }
+
+                if (player.hitboxes[0].collide(hitbox)) {
+                    player.y += player.halfheight / 2;
+                    player.height -= player.halfheight;
+                    while (player.hitboxes[0].collide(hitbox)) {
+                        map.x -= dir.x;
+                        chunker.updateHitboxes();
+                    }
+                    player.y -= player.halfheight / 2;
+                    player.height += player.halfheight;
+                    map.vel.x = lerp(map.vel.x, 0, (1 ** time.fixedDeltaTime) * time.scale * 0.2)
+                }
+                if (player.hitboxes[0].collide(hitbox)) {
+
+                    while (player.hitboxes[0].collide(hitbox)) {
+                        map.y -= dir.y;
+                        chunker.updateHitboxes();
+                    }
+
+                    map.vel.y = lerp(map.vel.y, 0, (1 ** time.fixedDeltaTime) * time.scale * 0.2)
+                }
+            }
+        }
+    }
+
+    // ############################
+    // GUNS
+    // ############################
     updateBullets()
     gunUpdate()
-    player.angletopoint([mouse.x, mouse.y])
-
-
-    map.vector.x = keyPressed("a") - keyPressed("d");
-    map.vector.y = keyPressed("w") - keyPressed("s");
-
-
+    if (!ui.weapon_selector.active) {
+        player.angletopoint([mouse.x, mouse.y])
+    }
     if (mouse.click) {
         shoot(gun.equiped, gun.angle)
     }
+
     if (keyPressed("r") && gun.mag.current < gun.mag.max) {
         reload(gun.equiped)
     }
+
+    // ############################
+    // ENTITIES
+    // ############################
+    updateEntities()
+
+    // ############################
+    // UI
+    // ############################
     if (keyPressed("q") || ui.weapon_selector.active) {
         ui.weapon_selector.update()
     }
-    if (keyPressed("n")) {
-        time.scale = lerp(time.scale, 0.5, (1 ** time.fixedDeltaTime) * 0.1)
-    }
-    else if (!ui.weapon_selector.active) {
-        time.scale = lerp(time.scale, 1, (1 ** time.fixedDeltaTime) * 0.1)
+    if (!ui.weapon_selector.active) {
+        if (keyPressed("n")) {
+            time.scale = lerp(time.scale, 0.5, (1 ** time.fixedDeltaTime) * 0.1)
+        }
+        else {
+            time.scale = lerp(time.scale, 1, (1 ** time.fixedDeltaTime) * 0.1)
+        }
     }
 
+
+    // ############################
+    // MAP
+    // ############################
+    map.vector.x = keyPressed("a") - keyPressed("d");
+    map.vector.y = keyPressed("w") - keyPressed("s");
 
     if (map.vector.x != 0 && map.vector.y != 0) {
         map.currentVelocity = 0.707106781187 * map.velocity;
