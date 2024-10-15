@@ -3,7 +3,7 @@ import { drawPointers, isClicking, isHovering, keyPressed, mouse, pointers } fro
 import { button, camera, hitbox, hitboxCircleFixed, hitboxFixed, object, slider, sliderv } from "./src/js/classes.js";
 import { loadFont, loadImage } from "./src/js/loader.js";
 import { setup, clear, drawtext, shakeScreen, lerp } from "./src/js/functions.js";
-import { player } from "./player.js";
+import { animatePlayer, player } from "./player.js";
 import { map } from "./map.js";
 import { ParticleGenerator } from "./src/plugins/particles/particles.js";
 
@@ -13,6 +13,7 @@ import { bullets, gun, gunDraw, gunUpdate, shoot, reload, switchGun, drawBullets
 import { ui } from "./ui.js";
 import { chunker, chunker_config } from "./chunker.js";
 import { bullet_decay, drawBulletDecay, updateEntities } from "./entities.js";
+import { crosshair, crosshairAngle, updateCrosshair } from "./crosshair.js";
 
 await setup(1920, 1080, 0.99, 60);
 
@@ -38,6 +39,7 @@ window.addEventListener("update", () => {
     // #############
     // END
     // #############
+    animatePlayer()
     player.draw()
     gunDraw()
 
@@ -56,14 +58,19 @@ window.addEventListener("update", () => {
     // #############
     // END
     // #############
-
+    chunker.updateHitboxes()
     chunker.drawChunkHitbox()
     chunker.drawChunk()
 
+    crosshair.draw()
     ui.weapon_info.draw()
 
     if (keyPressed("q") || ui.weapon_selector.active) {
+        mouse.show = true;
         ui.weapon_selector.draw()
+    }
+    else {
+        mouse.show = false
     }
     drawtext(chunker.chunk.trunc.x + ", " + chunker.chunk.trunc.y, [0, 24], 24, "sans-serif", "top", "start", 0, 1.0)
     drawtext(map.x.toFixed(0) + ", " + map.y.toFixed(0), [0, 0], 24, "sans-serif", "top", "start", 0, 1.0)
@@ -88,21 +95,16 @@ window.addEventListener("fixedUpdate", () => {
                 bullets.forEach((bullet, index) => {
                     bullet.x -= map.x
                     bullet.y -= map.y
-                    let hitted = false
-                    let per = 0
-                    let savedPOS = [0, 0]
                     const closestX = Math.min(Math.max(bullet.x, hitbox.x), hitbox.x + hitbox.width);
                     const closestY = Math.min(Math.max(bullet.y, hitbox.y), hitbox.y + hitbox.height);
                     const distanceX = Math.abs(bullet.x - closestX);
                     const distanceY = Math.abs(bullet.y - closestY);
                     if (distanceX <= bullet.width / 2 && distanceY <= bullet.height / 2) {
-                        hitted = true
-                        savedPOS = [bullet.x, bullet.y]
                         bullet.vel.x = 0
                         bullet.vel.y = 0
                         bullets.splice(index, 1)
                         bullet.toDelete = true
-                        new bullet_decay(image[`${bullet.type}bullet`], savedPOS[0], savedPOS[1], bullet.width, bullet.height, bullet.angle)
+                        new bullet_decay(image[`${bullet.type}bullet`], bullet.x, bullet.y, bullet.width, bullet.height, bullet.angle)
                     }
 
                     bullet.x += map.x
@@ -132,7 +134,7 @@ window.addEventListener("fixedUpdate", () => {
                         chunker.updateHitboxes();
                     }
 
-                    map.vel.y = lerp(map.vel.y, 0, (1 ** time.fixedDeltaTime) * time.scale * 0.2)
+                    map.vel.y = 0//lerp(map.vel.y, 0, (1 ** time.fixedDeltaTime) * time.scale * 0.2)
                 }
             }
         }
@@ -144,7 +146,7 @@ window.addEventListener("fixedUpdate", () => {
     updateBullets()
     gunUpdate()
     if (!ui.weapon_selector.active) {
-        player.angletopoint([mouse.x, mouse.y])
+        updateCrosshair();
     }
     if (mouse.click) {
         shoot(gun.equiped, gun.angle)
@@ -203,8 +205,8 @@ window.addEventListener("fixedUpdate", () => {
     }
 
 
-    map.vel.x *= Math.pow(0.07, time.fixedDeltaTime);
-    map.vel.y *= Math.pow(0.07, time.fixedDeltaTime);
+    map.vel.x *= Math.pow(0.03, time.fixedDeltaTime);
+    map.vel.y *= Math.pow(0.03, time.fixedDeltaTime);
 
     map.x += map.vel.x * time.fixedDeltaTime * time.scale;
     map.y += map.vel.y * time.fixedDeltaTime * time.scale;

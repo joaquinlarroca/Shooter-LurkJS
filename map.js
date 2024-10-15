@@ -12,7 +12,7 @@ export let map = {
         y: 3072
     },
     currentVelocity: 0,
-    velocity: 2500,
+    velocity: 2200,
     vel: {
         x: 0,
         y: 0

@@ -7,7 +7,7 @@ import { player } from "./player.js";
 import { map } from "./map.js";
 
 export const chunker_config = {
-    "size": 750,
+    "size": 1000,
     "radius": 1.5,
     "ref": map,
     "mapMin": [960, 540],
@@ -72,13 +72,7 @@ export let chunker = {
                 }
                 hitbox.x = hitbox.initialX - map.x
                 hitbox.y = hitbox.initialY - map.y
-                if (map.x != map.min.x && map.x != map.max.x) {
-                    hitbox.x -= map.vel.x * time.fixedDeltaTime * time.scale
 
-                }
-                if (map.y != map.min.y && map.y != map.max.y) {
-                    hitbox.y -= map.vel.y * time.fixedDeltaTime * time.scale
-                }
 
             }
         }

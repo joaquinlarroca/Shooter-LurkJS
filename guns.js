@@ -6,6 +6,7 @@ import { setup, clear, drawtext, shakeScreen, lerp, lerpAngle } from "./src/js/f
 import { player } from "./player.js";
 import { map } from "./map.js";
 import { ui } from "./ui.js";
+import { crosshair, crosshairAngle } from "./crosshair.js";
 
 
 await loadImage("src/images/guns/rifle.png", "rifle");
@@ -23,10 +24,12 @@ await loadImage("src/images/bullets/medium.png", "mediumbullet");
 await loadImage("src/images/bullets/small.png", "smallbullet");
 
 export let gun = new object(image["gun"], [0, 0], [100, 32]);
+
 let dvd = new sound("./src/sounds/rifle.wav", 1, 1, true);
 dvd.play()
+
 gun.switching = false;
-gun.equiped = "revolver"; // ARMA EQUIPADA
+gun.equiped = "p90"; // ARMA EQUIPADA
 gun.mag = {
     max: 5,
     current: 500
@@ -50,6 +53,7 @@ gun.bullet_types = {
 
 
 }
+// size reason = 4
 gun.types = {
     "rifle": {
         image: image["rifle"],
@@ -156,17 +160,30 @@ gun.types = {
 let gunMove = 0;
 let gunReloadAngle = 0;
 export let bullets = [];
+/**
+ * Draws all bullets in the array to the canvas.
+ * @function drawBullets
+ */
 export function drawBullets() {
     bullets.forEach(element => {
         element.draw();
     });
 }
+/**
+ * Updates all bullets in the array, moving them by their velocity times the game's
+ * fixed delta time, times the game's scale.
+ * @function updateBullets
+ */
 export function updateBullets() {
     for (let i = 0; i < bullets.length; i++) {
         bullets[i].x += bullets[i].vel.x * time.deltaTime * time.scale
         bullets[i].y += bullets[i].vel.y * time.deltaTime * time.scale
     }
 }
+/**
+ * Draws the current gun at the player's position, with the correct scale and angle, and at the correct position relative to the player.
+ * @function gunDraw
+ */
 export function gunDraw() {
     gun.setTexture(gun.types[gun.equiped].image)
     gun.y = player.y + player.height / 2 - gun.height / 3;
@@ -176,6 +193,11 @@ export function gunDraw() {
 }
 
 
+/**
+ * Updates the gun's properties, such as its position, scale, and angle, based on the current crosshair angle and the gun's type.
+ * Also updates the gun's recoil and reload angle.
+ * @function gunUpdate
+ */
 export function gunUpdate() {
     bullets = bullets.filter(bullet => bullet.toDelete == false)
     gun.mag.max = gun.types[gun.equiped].mag_size
@@ -187,18 +209,41 @@ export function gunUpdate() {
         gun.recoil = lerp(gun.recoil + gunReloadAngle / 7, 0, (1 ** time.fixedDeltaTime) * 0.25 * time.scale)
         gun.width = lerp(gun.width, gun.types[gun.equiped].size.width, (1 ** time.fixedDeltaTime) * 0.25 * time.scale)
         gun.height = lerp(gun.height, gun.types[gun.equiped].size.height, (1 ** time.fixedDeltaTime) * 0.1 * time.scale)
-
-
-
-        if (player.angle < -90 || player.angle > 90) {
+        if (crosshairAngle < -90 || crosshairAngle > 90) {
             gun.scale = [1, -1]
         }
         else {
             gun.scale = [1, 1]
         }
     }
-    gun.angle = lerpAngle(gun.angle, player.angle - gunReloadAngle * gun.scale[1], (1 ** time.fixedDeltaTime) * time.scale)
+    gun.angle = lerpAngle(gun.angle, crosshairAngle - gunReloadAngle * gun.scale[1], (1 ** time.fixedDeltaTime) * time.scale)
 }
+export class lerpTime {
+    /**
+     * Creates a new lerpTime object that linearly interpolates between two values over a given duration.
+     * @param {number} startval - The starting value of the interpolation.
+     * @param {number} endval - The ending value of the interpolation.
+     * @param {number} duration - The duration of the interpolation in milliseconds.
+     */
+    constructor(startval, endval, duration) {
+        this.startTime = Date.now();
+        this.lerp = 0;
+        this.interval = setInterval(() => {
+            let currentTime = Date.now();
+            let elapsedTime = currentTime - this.startTime;
+            this.lerp = Math.min(Math.max(lerp(startval, endval, elapsedTime / duration), Math.min(startval, endval)), Math.max(startval, endval))
+            if (elapsedTime >= (duration / time.scale)) {
+                this.lerp = 1
+                clearInterval(this.interval);
+                delete this
+            }
+        }, 10)
+    }
+}
+/**
+ * Reloads the specified gun type, and sets the gun's mag size to the type's mag size.
+ * @param {string} gunType - The type of gun to reload.
+ */
 export function reload(gunType) {
     if (!gun.reloading) {
         gun.reloading = true
@@ -221,12 +266,17 @@ export function reload(gunType) {
         }, 10);
     }
 }
+/**
+ * Switches the gun to the specified type, and sets the gun's mag size to the type's mag size.
+ * @param {string} switchto - The type of gun to switch to.
+ */
 export function switchGun(switchto) {
     if (!gun.switchGun) {
         gun.switching = true
-        gun.alpha = 0
+        let alphaLerp = new lerpTime(1, 0, gun.types[switchto].switch_time)
         let startTime = Date.now();
         let interval = setInterval(() => {
+            gun.alpha = alphaLerp.lerp
             let currentTime = Date.now();
             let elapsedTime = currentTime - startTime;
             let switch_time = gun.types[switchto].switch_time
@@ -241,6 +291,11 @@ export function switchGun(switchto) {
         }, 10);
     }
 }
+/**
+ * Shoots a bullet from the gun with the specified type and direction.
+ * @param {string} gunType - The type of gun to shoot from.
+ * @param {number} direction - The direction to shoot the bullet in.
+ */
 export function shoot(gunType, direction) {
     if (time.scale > 0.1) {
         if (!gun.switching && gunReloadAngle < 5 && !ui.weapon_selector.active) {
@@ -281,8 +336,8 @@ export function shoot(gunType, direction) {
 
                         let gunDir = direction
                         gunDir += (Math.random() - 0.5) * (gun.types[gunType].dispersion + moving_factor)
+                        bullet.angle = gunDir
                         gunDir = gunDir * (Math.PI / 180);
-                        bullet.angle = direction
                         bullet.move(gun.types[gunType].size.width)
                         bullet.vel.x = Math.cos(gunDir) * 2000 + map.vel.x
                         bullet.vel.y = Math.sin(gunDir) * 2000 + map.vel.y
