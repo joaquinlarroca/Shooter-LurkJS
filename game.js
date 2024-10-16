@@ -100,11 +100,13 @@ window.addEventListener("fixedUpdate", () => {
                     const distanceX = Math.abs(bullet.x - closestX);
                     const distanceY = Math.abs(bullet.y - closestY);
                     if (distanceX <= bullet.width / 2 && distanceY <= bullet.height / 2) {
+                        var x = distanceX + bullet.x - bullet.halfwidth
+                        var y = distanceY + bullet.y - bullet.halfheight
                         bullet.vel.x = 0
                         bullet.vel.y = 0
                         bullets.splice(index, 1)
                         bullet.toDelete = true
-                        new bullet_decay(image[`${bullet.type}bullet`], bullet.x, bullet.y, bullet.width, bullet.height, bullet.angle)
+                        new bullet_decay(image[`${bullet.type}bullet`], x, y, bullet.width, bullet.height, bullet.angle + (Math.random() - 0.5) * 22.5)
                     }
 
                     bullet.x += map.x

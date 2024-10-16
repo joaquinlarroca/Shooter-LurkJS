@@ -66,7 +66,7 @@ gun.types = {
         },
         damage: 20,
         hold_shot: true,
-        mag_size: 25,
+        mag_size: 15,
         reload_time: 1000,
         move: 60,
         dispersion: 5,
@@ -86,7 +86,7 @@ gun.types = {
         },
         damage: 10,
         hold_shot: false,
-        mag_size: 5,
+        mag_size: 4,
         reload_time: 1250,
         move: 55,
         dispersion: 15,
@@ -126,7 +126,7 @@ gun.types = {
         },
         damage: 8,
         hold_shot: true,
-        mag_size: 4,
+        mag_size: 6,
         reload_time: 800,
         move: 65,
         dispersion: 5,
@@ -338,7 +338,7 @@ export function shoot(gunType, direction) {
                         gunDir += (Math.random() - 0.5) * (gun.types[gunType].dispersion + moving_factor)
                         bullet.angle = gunDir
                         gunDir = gunDir * (Math.PI / 180);
-                        bullet.move(gun.types[gunType].size.width)
+                        bullet.move(gun.types[gunType].size.width / 1.5)
                         bullet.vel.x = Math.cos(gunDir) * 2000 + map.vel.x
                         bullet.vel.y = Math.sin(gunDir) * 2000 + map.vel.y
                         gun.recoil += gun.types[gunType].recoil
