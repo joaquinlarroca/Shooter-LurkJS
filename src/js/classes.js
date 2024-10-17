@@ -103,7 +103,7 @@ export class hitboxCircle {
         this.type = "hitbox-circle"
         this.object = object ?? null
         this.sizeMultiplier = sizeMultiplier ?? 1
-        this.radius = this.object.halfwidth
+        this.radius = Math.min(this.object.halfwidth, this.object.halfheight)
         this.x = this.object.x + this.object.halfwidth
         this.y = this.object.y + this.object.halfheight
     }
@@ -204,7 +204,7 @@ export class object {
         this.x = x ?? 0
         this.y = y ?? 0
         this.offset = [0.5, 0.5]
-        
+
         this.toDelete = false
 
         this.width = width ?? 32
@@ -582,7 +582,7 @@ export class slider {
             height: this.height
 
         }
-        if(this.fill.inverted){
+        if (this.fill.inverted) {
             var inverted_percentage = this.maxpercentage - this.minpercentage - percentage_slider
             fill.x = -this.width * this.offset[0] + this.width
             fill.width = -inverted_percentage * this.width + inverted_percentage * this.thumb.width - this.thumb.width / 2
@@ -862,7 +862,7 @@ export class sliderv {
             height: percentage_slider * this.height - percentage_slider * this.thumb.height + this.thumb.height / 2
 
         }
-        if(this.fill.inverted){
+        if (this.fill.inverted) {
             var inverted_percentage = this.maxpercentage - this.minpercentage - percentage_slider
             fill.y = -this.height * this.offset[0] + this.height
             fill.height = -inverted_percentage * this.height + inverted_percentage * this.thumb.height - this.thumb.height / 2

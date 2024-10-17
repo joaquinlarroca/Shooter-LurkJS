@@ -14,8 +14,13 @@ export const chunker_config = {
     "maps": {
         "the-range": [
             [ // 0,x
-                [new hitboxFixed([300, 300], [200, 200]), new hitboxFixed([0, 0], [50, 750]), new hitboxFixed([50, 0], [700, 50])], //0,0
+                [new hitboxFixed([400, 400], [160, 160]), new hitboxFixed([0, 0], [80, 1000]), new hitboxFixed([80, 0], [920, 80])],
+                [new hitboxFixed([1000, 0], [1000, 80]), new hitboxFixed([1840, 0], [80, 1000])]
             ],
+            [
+                [new hitboxFixed([0, 1000], [80, 840]), new hitboxFixed([0, 1840], [1000, 80])],
+                [new hitboxFixed([1840, 1000], [80, 840]), new hitboxFixed([1000, 1840], [920, 80])],
+            ]
 
         ]
     }

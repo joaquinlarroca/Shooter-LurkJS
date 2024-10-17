@@ -1,6 +1,6 @@
 import { global, screen, ctx, canvas, time, image } from "./src/js/main.js";
 import { drawPointers, isClicking, isHovering, keyPressed, mouse, pointers } from "./src/js/listeners.js";
-import { button, camera, hitbox, hitboxCircleFixed, hitboxFixed, object, slider, sliderv, sound2, sound } from "./src/js/classes.js";
+import { button, camera, hitbox, hitboxCircleFixed, hitboxFixed, object, slider, sliderv, sound2, sound, hitboxCircle } from "./src/js/classes.js";
 import { loadFont, loadImage, loadSound } from "./src/js/loader.js";
 import { setup, clear, drawtext, shakeScreen, lerp, lerpAngle } from "./src/js/functions.js";
 import { player } from "./player.js";
@@ -79,7 +79,7 @@ gun.types = {
         image: image["shotgun"],
         switch_time: 250,
         bullet_type: "shell",
-        moving_angle_multiplier: 3,
+        moving_angle_multiplier: 30,
         size: {
             width: 118,
             height: 48
@@ -99,7 +99,7 @@ gun.types = {
         image: image["p90"],
         switch_time: 300,
         bullet_type: "small",
-        moving_angle_multiplier: 2,
+        moving_angle_multiplier: 20,
         size: {
             width: 80,
             height: 48
@@ -119,7 +119,7 @@ gun.types = {
         image: image["revolver"],
         switch_time: 300,
         bullet_type: "medium",
-        moving_angle_multiplier: 2,
+        moving_angle_multiplier: 20,
         size: {
             width: 80,
             height: 48
@@ -312,6 +312,7 @@ export function shoot(gunType, direction) {
                             [player.x + player.halfheight + map.x, player.y + player.halfheight + map.y],
                             [gun.bullet_types[gun.types[gunType].bullet_type].width, gun.bullet_types[gun.types[gunType].bullet_type].height]
                         )
+                        bullet.hitboxes.push(new hitboxCircle(bullet, 1))
                         bullet.type = gun.types[gunType].bullet_type
                         bullet.vel = { x: 0, y: 0 }
                         let startTime = Date.now();
@@ -324,18 +325,21 @@ export function shoot(gunType, direction) {
                             }
                         }, 10);
 
-                        var moving_factor_x = map.vel.x / (map.currentVelocity * time.fixedDeltaTime * time.scale)
-                        var moving_factor_y = map.vel.y / (map.currentVelocity * time.fixedDeltaTime * time.scale)
+                        var moving_factor_x = map.vel.x / 609
+                        var moving_factor_y = map.vel.y / 609
+
                         moving_factor_x = Math.abs(Math.min(Math.max(moving_factor_x, -1), 1))
                         moving_factor_y = Math.abs(Math.min(Math.max(moving_factor_y, -1), 1))
-                        var moving_factor = gun.types[gunType].moving_angle_multiplier * ((moving_factor_x + moving_factor_y) / 2)
+                        console.log(moving_factor_x, moving_factor_y);
+
+                        var moving_factor = gun.types[gunType].moving_angle_multiplier * (moving_factor_x + moving_factor_y)
 
 
                         bullet.x -= bullet.halfwidth
                         bullet.y -= bullet.halfheight
 
                         let gunDir = direction
-                        gunDir += (Math.random() - 0.5) * (gun.types[gunType].dispersion + moving_factor)
+                        gunDir += (Math.random() - 0.5) * (gun.types[gunType].dispersion + (Math.random() - 0.5) * moving_factor)
                         bullet.angle = gunDir
                         gunDir = gunDir * (Math.PI / 180);
                         bullet.move(gun.types[gunType].size.width / 1.5)
