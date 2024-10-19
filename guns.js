@@ -128,7 +128,7 @@ gun.types = {
         hold_shot: true,
         mag_size: 6,
         reload_time: 800,
-        move: 65,
+        move: 60,
         dispersion: 5,
         time: 750,
         bullet_count: 1,

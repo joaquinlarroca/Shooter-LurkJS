@@ -27,6 +27,16 @@ export function drawBulletDecay() {
         }
     }
 }
+export class box extends object {
+    constructor(img, x, y, width, height) {
+        super(img, [0, 0], [width, height], [0, 0])
+        this.entity_type = "box"
+        this.x = x + map.x
+        this.y = y + map.y
+        entities.push(this)
+    }
+}
+
 export function updateEntities() {
     for (let i = 0; i < entities.length; i++) {
         if (entities[i].entity_type == "bullet_decay") {
