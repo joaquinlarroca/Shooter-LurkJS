@@ -18,7 +18,7 @@ import { crosshair, crosshairAngle, updateCrosshair } from "./crosshair.js";
 
 await setup(1920, 1080, 0.99, 60);
 
-let partGen = new ParticleGenerator(969, 540, 100, 15, "rgba(255,255,255,0.5)", 500, 500, 1500, 1e-100)
+export let partGen = new ParticleGenerator(969, 540, 2, 16, "rgba(255,255,255,0.25)", 0, 0, 1500, 1e-75)
 
 window.addEventListener("started", () => {
 })
@@ -32,16 +32,21 @@ window.addEventListener("update", () => {
     ctx.translate(-map.x, -map.y)
 
     map.object.draw()
+
+    drawBulletDecay()
     drawBullets()
+
     ctx.restore()
     // #############
     // END
     // #############
-    animatePlayer()
+    animatePlayer();
     player.draw()
-    player.hitboxes[1].x = player.x
-    player.hitboxes[1].y = player.y + player.height * 0.5
-    player.hitboxes[1].draw()
+
+    //player.hitboxes[1].x = player.x
+    //player.hitboxes[1].y = player.y + player.height * 0.5
+    //player.hitboxes[1].draw()
+
     gunDraw()
 
 
@@ -53,15 +58,15 @@ window.addEventListener("update", () => {
     ctx.translate(-map.x, -map.y)
 
     partGen.draw()
-    drawBulletDecay()
+
 
     ctx.restore()
     // #############
     // END
     // #############
-    chunker.updateHitboxes()
-    chunker.drawChunkHitbox()
-    chunker.drawChunk()
+    //chunker.updateHitboxes()
+    //chunker.drawChunkHitbox()
+    //chunker.drawChunk()
 
     crosshair.draw()
     ui.weapon_info.draw()
@@ -79,7 +84,7 @@ window.addEventListener("update", () => {
 });
 
 window.addEventListener("fixedUpdate", () => {
-
+    partGen.update()
     // ############################
     //CHUNKER
     // ############################

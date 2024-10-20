@@ -7,6 +7,7 @@ import { player } from "./player.js";
 import { map } from "./map.js";
 import { ui } from "./ui.js";
 import { crosshair, crosshairAngle } from "./crosshair.js";
+import { partGen } from "./game.js";
 
 
 await loadImage("src/images/guns/rifle.png", "rifle");
@@ -166,7 +167,9 @@ export let bullets = [];
  */
 export function drawBullets() {
     bullets.forEach(element => {
-        element.draw();
+        if (distance(screen.canvas.width / 2, screen.canvas.height / 2, element.x - map.x, element.y - map.y) > gun.width - gun.recoil) {
+            element.draw();
+        }
     });
 }
 /**
@@ -345,7 +348,13 @@ export function shoot(gunType, direction) {
                         bullet.vel.x = Math.cos(gunDir) * 2000 + map.vel.x
                         bullet.vel.y = Math.sin(gunDir) * 2000 + map.vel.y
                         gun.recoil += gun.types[gunType].recoil
-
+                        bullet.move(gun.types[gunType].size.width * 2 / 3)
+                        partGen.x = bullet.x
+                        partGen.y = bullet.y
+                        bullet.move(-gun.types[gunType].size.width * 2 / 3)
+                        partGen.speed.x = bullet.vel.x * 0.5
+                        partGen.speed.y = bullet.vel.y * 0.5
+                        partGen.create()
                         bullets.push(bullet)
                     }
                     let startTime = Date.now();

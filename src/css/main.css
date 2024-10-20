@@ -25,7 +25,7 @@ canvas {
     --main: #A9F249;
 
     --body-bg: var(--background);
-    --canvas-bg: #000000;
+    --canvas-bg: #181425;
 
     --loading-bar-color: #000000;
     --loading-screen-background: var(--background);
