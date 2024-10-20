@@ -33,6 +33,7 @@ await loadImage("src/images/player/horizontal/7.png", "horizontal7");
 
 // player reason = 5
 export let player = new object(image["conejo"], [0, 0], [60, 85])
+player.hitboxes.push(new hitboxFixed([player.x, player.y + player.height / 2], [player.width, player.height / 2]))
 player.frame = {
     x: 0,
     y: 0,

@@ -15,11 +15,8 @@ import { chunker, chunker_config } from "./chunker.js";
 import { bullet_decay, drawBulletDecay, updateEntities } from "./entities.js";
 import { crosshair, crosshairAngle, updateCrosshair } from "./crosshair.js";
 
-await loadImage("src/images/map.png", "map");
+
 await setup(1920, 1080, 0.99, 60);
-
-
-let fondo = new object(image["map"], [0, 0], [1920, 1920]);
 
 let partGen = new ParticleGenerator(969, 540, 100, 15, "rgba(255,255,255,0.5)", 500, 500, 1500, 1e-100)
 
@@ -34,7 +31,7 @@ window.addEventListener("update", () => {
     ctx.save()
     ctx.translate(-map.x, -map.y)
 
-    fondo.draw()
+    map.object.draw()
     drawBullets()
     ctx.restore()
     // #############
@@ -42,6 +39,9 @@ window.addEventListener("update", () => {
     // #############
     animatePlayer()
     player.draw()
+    player.hitboxes[1].x = player.x
+    player.hitboxes[1].y = player.y + player.height * 0.5
+    player.hitboxes[1].draw()
     gunDraw()
 
 
@@ -60,8 +60,8 @@ window.addEventListener("update", () => {
     // END
     // #############
     chunker.updateHitboxes()
-    //chunker.drawChunkHitbox()
-    //chunker.drawChunk()
+    chunker.drawChunkHitbox()
+    chunker.drawChunk()
 
     crosshair.draw()
     ui.weapon_info.draw()
@@ -73,8 +73,9 @@ window.addEventListener("update", () => {
     else {
         mouse.show = false
     }
-    drawtext(chunker.chunk.trunc.x + ", " + chunker.chunk.trunc.y, [0, 24], 24, "sans-serif", "top", "start", 0, 1.0)
-    drawtext((map.x + mouse.x).toFixed(0) + ", " + (map.y + mouse.y).toFixed(0), [0, 0], 24, "sans-serif", "top", "start", 0, 1.0)
+    drawtext("World: " + (map.x + mouse.x).toFixed(0) + ", " + (map.y + mouse.y).toFixed(0), [0, 0], 24, "sans-serif", "top", "start", 0, 1.0)
+    drawtext("Player: " + (map.x + mouse.x - screen.canvas.width / 2).toFixed(0) + ", " + (map.y + mouse.y - screen.canvas.height / 2).toFixed(0), [0, 24], 24, "sans-serif", "top", "start", 0, 1.0)
+    drawtext("Chunk: " + (((chunker.chunk.x * chunker_config["size"]) + mouse.x - screen.canvas.width / 2 + player.halfwidth) % chunker_config["size"]).toFixed(0) + ", " + (((chunker.chunk.y * chunker_config["size"]) + mouse.y - screen.canvas.height / 2 + player.halfheight) % chunker_config["size"]).toFixed(0), [0, 48], 24, "sans-serif", "top", "start", 0, 1.0)
 });
 
 window.addEventListener("fixedUpdate", () => {
@@ -127,21 +128,23 @@ window.addEventListener("fixedUpdate", () => {
                     x: Math.sign((hitbox.x + hitbox.width / 2) - player.x - player.halfwidth),
                     y: Math.sign((hitbox.y + hitbox.height / 2) - player.y - player.halfheight)
                 }
+                player.hitboxes[1].x = player.x
+                player.hitboxes[1].y = player.y + player.height * 0.5
 
-                if (player.hitboxes[0].collide(hitbox)) {
-                    player.y += player.halfheight / 2;
-                    player.height -= player.halfheight;
-                    while (player.hitboxes[0].collide(hitbox)) {
+                if (player.hitboxes[1].collide(hitbox)) {
+                    player.hitboxes[1].y += player.halfheight / 2;
+                    player.hitboxes[1].height -= player.halfheight;
+                    while (player.hitboxes[1].collide(hitbox)) {
                         map.x -= dir.x;
                         chunker.updateHitboxes();
                     }
-                    player.y -= player.halfheight / 2;
-                    player.height += player.halfheight;
+                    player.hitboxes[1].y -= player.halfheight / 2;
+                    player.hitboxes[1].height += player.halfheight;
                     map.vel.x = lerp(map.vel.x, 0, (1 ** time.fixedDeltaTime) * time.scale * 0.2)
                 }
-                if (player.hitboxes[0].collide(hitbox)) {
+                if (player.hitboxes[1].collide(hitbox)) {
 
-                    while (player.hitboxes[0].collide(hitbox)) {
+                    while (player.hitboxes[1].collide(hitbox)) {
                         map.y -= dir.y;
                         chunker.updateHitboxes();
                     }

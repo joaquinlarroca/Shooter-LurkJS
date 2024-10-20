@@ -7,29 +7,32 @@ import { player } from "./player.js";
 import { map } from "./map.js";
 
 export const chunker_config = {
-    "size": 1000,
+    "size": 1040,
     "radius": 1.5,
     "ref": map,
     "mapMin": [960, 540],
     "maps": {
-        "the-range": [
-            [ // 0,x
-                [new hitboxFixed([400, 400], [160, 160]), new hitboxFixed([0, 0], [80, 1000]), new hitboxFixed([80, 0], [920, 80])],
-                [new hitboxFixed([1000, 0], [1000, 80]), new hitboxFixed([1840, 0], [80, 1000])]
+        "0": [
+            [
+                [new hitboxFixed([400, 400], [160, 160]), new hitboxFixed([0, 0], [80, 1000]), new hitboxFixed([0, 0], [1000, 80])],
+                [new hitboxFixed([0, 0], [920, 80]), new hitboxFixed([840, 0], [80, 1000])]
             ],
             [
-                [new hitboxFixed([0, 1000], [80, 840]), new hitboxFixed([0, 1840], [1000, 80])],
-                [new hitboxFixed([1840, 1000], [80, 840]), new hitboxFixed([1000, 1840], [920, 80])],
+                [new hitboxFixed([0, 0], [80, 920]), new hitboxFixed([0, 840], [1000, 80])],
+                [new hitboxFixed([840, 0], [80, 920]), new hitboxFixed([0, 840], [920, 80])],
             ]
-
+        ],
+        "1": [
+            [
+                [new hitboxFixed([880, 560], [160, 160]),new hitboxFixed([560, 400], [80, 400]), new hitboxFixed([560, 80], [80, 80]), new hitboxFixed([0, 0], [80, 1040]), new hitboxFixed([0, 0], [1040, 80])],
+                [new hitboxFixed([0, 0], [160, 320]),new hitboxFixed([160, 0], [160, 240])],
+            ]
         ]
     }
 }
-//chunkX = player.x / chunker_config.size
 
 export let chunker = {
-    map: "the-range",
-    // active chunks axis [y,x]
+    map: map.map,
     activeChunks: [],
     objects: [],
     chunk: {
@@ -51,12 +54,9 @@ export let chunker = {
         this.chunk.trunc.y = Math.trunc(this.chunk.y)
     },
     exists(x, y) {
-        // Check if y or x is negative
         if (y < 0 || x < 0) {
             return false;
         }
-
-        // Check if the map, y level, or x level is undefined or does not exist
         if (typeof chunker_config["maps"][this.map] === "undefined" ||
             typeof chunker_config["maps"][this.map][y] === "undefined" ||
             typeof chunker_config["maps"][this.map][y][x] === "undefined") {
@@ -75,13 +75,10 @@ export let chunker = {
                     hitbox.initialX = hitbox.x
                     hitbox.initialY = hitbox.y
                 }
-                hitbox.x = hitbox.initialX - map.x
-                hitbox.y = hitbox.initialY - map.y
-
-
+                hitbox.x = hitbox.initialX - map.x + chunker_config["size"] * x
+                hitbox.y = hitbox.initialY - map.y + chunker_config["size"] * y
             }
         }
-
     },
     updateActiveChunks() {
         this.activeChunks = []
@@ -140,9 +137,7 @@ export let chunker = {
 
     },
     generateChunks() {
-        // Create an outer array of length 'height'
         const chunks = new Array(chunker.size.height);
-        // Fill each element of the outer array with a new array of length 'width'
         for (let y = 0; y < chunker.size.height; y++) {
             chunks[y] = new Array(chunker.size.width);
             for (let x = 0; x < chunker.size.width; x++) {
@@ -156,13 +151,11 @@ export let chunker = {
         const chunks = chunker_config["maps"][chunker.map].length ? chunker_config["maps"][chunker.map] : new Array(chunker.size.height);
 
         for (let y = 0; y < chunker.size.height; y++) {
-            // If the row doesn't exist, create it
             if (!chunks[y]) {
                 chunks[y] = new Array(chunker.size.width);
             }
 
             for (let x = 0; x < chunker.size.width; x++) {
-                // If the chunk at (y, x) doesn't exist, create an empty array
                 if (!chunks[y][x]) {
                     chunks[y][x] = [];
                 }

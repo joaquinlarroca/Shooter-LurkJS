@@ -2,7 +2,7 @@ import { global, screen, ctx, canvas, time, image } from "./src/js/main.js";
 import { drawPointers, isClicking, isHovering, keyPressed, mouse, pointers } from "./src/js/listeners.js";
 import { button, camera, hitbox, hitboxCircleFixed, hitboxFixed, object, slider, sliderv, sound2, sound, hitboxCircle } from "./src/js/classes.js";
 import { loadFont, loadImage, loadSound } from "./src/js/loader.js";
-import { setup, clear, drawtext, shakeScreen, lerp, lerpAngle } from "./src/js/functions.js";
+import { setup, clear, drawtext, shakeScreen, lerp, lerpAngle, distance } from "./src/js/functions.js";
 import { player } from "./player.js";
 import { map } from "./map.js";
 import { ui } from "./ui.js";
@@ -309,7 +309,7 @@ export function shoot(gunType, direction) {
                     for (let i = 0; i < gun.types[gunType].bullet_count; i++) {
                         let bullet = new object(
                             image[`${gun.types[gunType].bullet_type}bullet`],
-                            [player.x + player.halfheight + map.x, player.y + player.halfheight + map.y],
+                            [player.x + player.halfheight + map.x - gun.bullet_types[gun.types[gunType].bullet_type].width / 2, player.y + player.halfheight + map.y - gun.bullet_types[gun.types[gunType].bullet_type].height / 2 + gun.height / 3],
                             [gun.bullet_types[gun.types[gunType].bullet_type].width, gun.bullet_types[gun.types[gunType].bullet_type].height]
                         )
                         bullet.hitboxes.push(new hitboxCircle(bullet, 1))
@@ -330,7 +330,6 @@ export function shoot(gunType, direction) {
 
                         moving_factor_x = Math.abs(Math.min(Math.max(moving_factor_x, -1), 1))
                         moving_factor_y = Math.abs(Math.min(Math.max(moving_factor_y, -1), 1))
-                        console.log(moving_factor_x, moving_factor_y);
 
                         var moving_factor = gun.types[gunType].moving_angle_multiplier * (moving_factor_x + moving_factor_y)
 
@@ -342,7 +341,7 @@ export function shoot(gunType, direction) {
                         gunDir += (Math.random() - 0.5) * (gun.types[gunType].dispersion + (Math.random() - 0.5) * moving_factor)
                         bullet.angle = gunDir
                         gunDir = gunDir * (Math.PI / 180);
-                        bullet.move(gun.types[gunType].size.width / 1.5)
+                        bullet.move(gun.types[gunType].size.width * 1 / 3)
                         bullet.vel.x = Math.cos(gunDir) * 2000 + map.vel.x
                         bullet.vel.y = Math.sin(gunDir) * 2000 + map.vel.y
                         gun.recoil += gun.types[gunType].recoil
