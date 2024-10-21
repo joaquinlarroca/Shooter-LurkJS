@@ -53,6 +53,7 @@ export class hitboxFixed {
     constructor([x, y], [width, height]) {
         global._hitboxes.push(this)
         this.type = "hitbox-rect-fixed"
+        this.color = "red"
         this.x = x ?? 0
         this.y = y ?? 0
         this.sizeMultiplier = 1
@@ -91,7 +92,7 @@ export class hitboxFixed {
     draw() {
         this.updateDimensions()
         screen.context.save()
-        screen.context.strokeStyle = "red"
+        screen.context.strokeStyle = this.color
         screen.context.lineWidth = 2
         screen.context.strokeRect(this.left, this.top, this.width, this.height)
         screen.context.restore()

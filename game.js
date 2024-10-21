@@ -64,9 +64,9 @@ window.addEventListener("update", () => {
     // #############
     // END
     // #############
-    //chunker.updateHitboxes()
-    //chunker.drawChunkHitbox()
-    //chunker.drawChunk()
+    chunker.updateHitboxes()
+    chunker.drawChunkHitbox()
+    chunker.drawChunk()
 
     crosshair.draw()
     ui.weapon_info.draw()
@@ -148,12 +148,10 @@ window.addEventListener("fixedUpdate", () => {
                     map.vel.x = lerp(map.vel.x, 0, (1 ** time.fixedDeltaTime) * time.scale * 0.2)
                 }
                 if (player.hitboxes[1].collide(hitbox)) {
-
                     while (player.hitboxes[1].collide(hitbox)) {
                         map.y -= dir.y;
                         chunker.updateHitboxes();
                     }
-
                     map.vel.y = 0
                 }
             }

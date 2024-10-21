@@ -10,12 +10,12 @@ await loadImage("src/images/map1.png", "map1");
 export let map = {
     map: "1",
     maps: {
-        "0": {width: 1920, height: 1920},
-        "1": {width: 5120, height: 1920},
+        "0": { width: 1920, height: 1920 },
+        "1": { width: 5120, height: 1920 },
     },
     object: undefined,
-    x: 630,
-    y: -200,
+    x: 3700,
+    y: 0,
     width: 9600,
     height: 5400,
     min: {
@@ -23,8 +23,8 @@ export let map = {
         y: -540
     },
     max: {
-        x: 9600,
-        y: 3072
+        x: 4210,
+        y: 1500
     },
     currentVelocity: 0,
     velocity: 2200,
