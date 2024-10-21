@@ -14,8 +14,8 @@ export let map = {
         "1": { width: 5120, height: 1920 },
     },
     object: undefined,
-    x: 3700,
-    y: 0,
+    x: 630,
+    y: 1000,
     width: 9600,
     height: 5400,
     min: {

@@ -29,6 +29,9 @@ export const chunker_config = {
                 [new hitboxFixed([0, 400], [1040, 160]), new hitboxFixed([0, 0], [1040, 80]), new hitboxFixed([960, 240], [80, 480]), new hitboxFixed([880, 560], [80, 80]), new hitboxFixed([80, 320], [160, 80]), new hitboxFixed([160, 240], [80, 80]), new hitboxFixed([640, 80], [80, 80]), new hitboxFixed([240, 880], [480, 160]), new hitboxFixed([400, 720], [160, 80]), new hitboxFixed([320, 800], [320, 80])],
                 [new hitboxFixed([0, 400], [720, 160]), new hitboxFixed([0, 0], [1040, 80]), new hitboxFixed([0, 320], [80, 80]), new hitboxFixed([320, 80], [160, 80]), new hitboxFixed([320, 160], [80, 80]), new hitboxFixed([960, 80], [80, 80]), new hitboxFixed([640, 320], [400, 160]), new hitboxFixed([880, 480], [80, 80]), new hitboxFixed([480, 720], [240, 160]), new hitboxFixed([160, 960], [80, 80])],
                 [new hitboxFixed([0, 0], [1040, 80]), new hitboxFixed([880, 0], [160, 1040]), new hitboxFixed([320, 80], [80, 80]), new hitboxFixed([320, 400], [80, 400]), new hitboxFixed([0, 320], [80, 160])]
+            ],
+            [
+                [new hitboxFixed([0, 0], [80, 1040]), new hitboxFixed([0, 800], [1040, 80]), new hitboxFixed([560, 720], [80, 80]), new hitboxFixed([960, 720], [80, 80]), new hitboxFixed([560, 80], [80, 400]), new hitboxFixed([880, 400], [160, 160])],
             ]
         ]
     }
