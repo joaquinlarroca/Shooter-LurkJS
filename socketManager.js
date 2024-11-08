@@ -59,7 +59,7 @@ export class client {
     constructor(ip, port) {
         this.client = new WebSocket(`ws://${ip}:${port}`);
         this.clientVersion = "1.0"
-        this.sign_error_codes = [0, 2, 3, 4]
+        this.sign_error_codes = [0, 2, 3, 4, 5]
 
         this.user = ""
 
@@ -77,7 +77,7 @@ export class client {
         this.players_list = {}
         this.other_players_list = {}
 
-        this.displayError = document.getElementById("errormsg")
+        this.displayError = document.getElementById("errormsg");
         this.userInput = document.getElementById('username');
         this.passwordInput = document.getElementById('password');
         this.registerbtn = document.getElementById("registerb")
@@ -86,12 +86,9 @@ export class client {
         this.registerbtn.addEventListener("click", () => {
             this.user = this.userInput.value
             this.send("register")
-            this.passwordInput.value = ""
         })
         this.loginbtn.addEventListener("click", () => {
-            this.user = this.userInput.value
             this.send("login")
-            this.passwordInput.value = ""
         })
 
         this.client.onopen = () => {
@@ -118,11 +115,14 @@ export class client {
                 const server_timestamp = data.data;
                 this.ping = Math.round(client_timestamp - server_timestamp);
             }
-            else if (data.type_msg == "sign_response") {
+            else if (data.type == "sign_response") {
+                console.log(data);
+                
                 if (data.code == 1) {
-                    window.dispatchEvent(new Event('cwsRegisterSucces'));
+                    window.dispatchEvent(new Event('cwsSignSucces'));
+
                 }
-                else if (sign_error_codes.includes(data.code)) {
+                else if (this.sign_error_codes.includes(data.code)) {
                     this.displayError.innerText = data.data
                 }
                 else {
@@ -177,16 +177,19 @@ export class client {
             let data = {}
             if (type == "pos") {
                 data = {
-                    type_msg: type,
-                    user: this.user,
+                    type: type,
+                    username: this.user,
                     x: this.x,
                     y: this.y
                 }
             }
             else if (type == "register" || type == "login") {
+                this.user = this.userInput.value
+                console.log(this.user);
+                
                 data = {
                     type: type,
-                    user: this.user,
+                    username: String(this.user),
                     password: await encryptData(this.publicKeyPem, this.passwordInput.value)
                 }
             }

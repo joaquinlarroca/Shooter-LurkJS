@@ -69,9 +69,13 @@ export let partGen = new ParticleGenerator(969, 540, 2, 16, "rgba(255,255,255,0.
 window.addEventListener("cwsconnected", () => {
     GameScreen = "logreg"
 })
+window.addEventListener("cwsSignSucces", () => {
+
+})
 window.addEventListener("started", () => {
 })
 window.addEventListener("update", () => {
+
     if (GameScreen == "connect") {
         global._disable_mouse_events = true;
         document.title = "Connect to a server"
@@ -84,6 +88,7 @@ window.addEventListener("update", () => {
         }
     }
     if (GameScreen == "logreg") {
+        console.log(GameScreen, global._disable_mouse_events)
         global._disable_mouse_events = true;
         document.title = "Sign to server"
 

@@ -9,12 +9,9 @@ import { setup, distance } from "./functions.js";
 
 export let preventKeys = [
     "Control",
-    "Shift",
     "Alt",
     "Meta",
     "Enter",
-    "Escape",
-    "Backspace",
     "Tab",
     "F1",
     "F2",

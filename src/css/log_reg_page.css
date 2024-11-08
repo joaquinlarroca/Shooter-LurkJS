@@ -11,9 +11,10 @@
 }
 
 #logreg #ping-logreg {
+    font-family: "alata", sans-serif;
     position: absolute;
     bottom: 1%;
-    color: #FFFFFF;
+    color: #000;
 }
 
 #logreg .form {
@@ -114,6 +115,7 @@
 
 #logreg #errormsg {
     max-width: 80%;
+    font-family: "alata", sans-serif;
     color: #FD4556;
 }
 

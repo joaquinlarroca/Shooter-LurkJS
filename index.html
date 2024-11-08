@@ -8,7 +8,6 @@
     <title>LurkJS</title>
     <link rel="stylesheet" href="src/css/log_reg_page.css">
     <link rel="stylesheet" href="src/css/connect_page.css">
-    <link rel="stylesheet" href="src/css/lobby_page.css">
     <link rel="stylesheet" href="src/css/main.css">
     <link rel="stylesheet" href="src/css/_loading.css">
 </head>
@@ -49,12 +48,12 @@
                 <img id="logo" src="./src/images/PizzaBlast.png">
                 <div id="in">
                     <label>Username</label>
-                    <input type="text" name="username" id="username">
+                    <input type="text" name="username" id="username" minlength="4" maxlength="16">
                 </div>
                 <div id="in">
                     <label>Password</label>
                     <div id="passwrd">
-                        <input type="password" name="password" id="password">
+                        <input type="password" name="password" id="password" minlength="8" maxlength="24">
                         <img id="showpass" src="./eye.svg">
                     </div>
                 </div>
