@@ -113,14 +113,13 @@ export class client {
             else if (data.type == "pong") {
                 const client_timestamp = Date.now();  // Accurate timestamp in milliseconds
                 const server_timestamp = data.data;
-                this.ping = Math.round(client_timestamp - server_timestamp);
+                this.ping = (client_timestamp - server_timestamp).toFixed(1);
             }
             else if (data.type == "sign_response") {
                 console.log(data);
                 
                 if (data.code == 1) {
                     window.dispatchEvent(new Event('cwsSignSucces'));
-
                 }
                 else if (this.sign_error_codes.includes(data.code)) {
                     this.displayError.innerText = data.data

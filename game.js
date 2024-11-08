@@ -70,7 +70,7 @@ window.addEventListener("cwsconnected", () => {
     GameScreen = "logreg"
 })
 window.addEventListener("cwsSignSucces", () => {
-
+    GameScreen = "lobby"
 })
 window.addEventListener("started", () => {
 })
@@ -88,7 +88,6 @@ window.addEventListener("update", () => {
         }
     }
     if (GameScreen == "logreg") {
-        console.log(GameScreen, global._disable_mouse_events)
         global._disable_mouse_events = true;
         document.title = "Sign to server"
 
@@ -102,7 +101,20 @@ window.addEventListener("update", () => {
             logreg.style.display = "flex"
         }
     }
+    if (GameScreen == "lobby") {
+        global._disable_mouse_events = true;
+        document.title = "Sign to server"
 
+        logregPing.innerText = `PING: ${gameClient.ping}`
+        if (connect.style.display != "none") {
+            connect.style.display = "none"
+        }
+
+
+        if (logreg.style.display == "none") {
+            logreg.style.display = "flex"
+        }
+    }
     if (GameScreen == "game") {
 
         clear()
