@@ -60,10 +60,11 @@ export class client {
         this.client = new WebSocket(`ws://${ip}:${port}`);
         this.clientVersion = "1.0"
         this.sign_error_codes = [0, 2, 3, 4, 5]
-
-        this.user = ""
-
         this.publicKeyPem = undefined;
+        this.profile = {
+            username: "",
+            tag: "",
+        }
 
         this.ping = -1
 
@@ -84,7 +85,6 @@ export class client {
         this.loginbtn = document.getElementById("loginb")
 
         this.registerbtn.addEventListener("click", () => {
-            this.user = this.userInput.value
             this.send("register")
         })
         this.loginbtn.addEventListener("click", () => {
@@ -183,12 +183,11 @@ export class client {
                 }
             }
             else if (type == "register" || type == "login") {
-                this.user = this.userInput.value
                 console.log(this.user);
                 
                 data = {
                     type: type,
-                    username: String(this.user),
+                    username: String(this.userInput.value),
                     password: await encryptData(this.publicKeyPem, this.passwordInput.value)
                 }
             }

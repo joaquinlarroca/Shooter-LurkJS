@@ -109,10 +109,11 @@ window.addEventListener("update", () => {
         if (connect.style.display != "none") {
             connect.style.display = "none"
         }
-
-
-        if (logreg.style.display == "none") {
-            logreg.style.display = "flex"
+        if (canvas.style.display != "flex") {
+            canvas.style.display = "flex"
+        }
+        if (logreg.style.display != "none") {
+            logreg.style.display = "none"
         }
     }
     if (GameScreen == "game") {
