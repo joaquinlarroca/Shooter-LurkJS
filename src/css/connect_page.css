@@ -1,0 +1,72 @@
+#connect {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100svw;
+    height: 100svh;
+    display: flex;
+    flex-direction: row;
+}
+
+#connect .right-side {
+    background-color: #ffffff;
+    height: 100%;
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#connect .right-side img {
+    width: 90%;
+    margin-bottom: 5%;
+    border-radius: 3px;
+}
+
+#connect .right-side input {
+    
+    min-height: 30px;
+    border-radius: 3px;
+    width: 80%;
+    height: 4%;
+    border: rgba(126, 126, 126, 0.1) 1.5px solid;
+    background-color: rgba(126, 126, 126, 0.1);
+    padding-left: 2%;
+    padding-right: 2%;
+    margin-bottom: 5%;
+}
+
+#connect .right-side button {
+    
+    background-color: #F24949;
+    margin-bottom: 5%;
+    border: 0;
+    border-radius: 10px;
+    padding: 3%;
+    cursor: pointer;
+    transition: 250ms;
+    font-weight: bolder;
+    font-family: "alata", sans-serif;
+}
+
+#connect .right-side button:hover {
+    box-shadow: 0px 0px 10px 0px #FD4556;
+    transition: 250ms;
+}
+
+#connect .right-side a {
+    color: #F24949;
+    font-family: "alata", sans-serif;
+    text-decoration: none;
+    text-align: center;
+}
+
+#connect .left-side-img {
+    background-image: url("../images/PizzaBlastBG.png");
+    background-size: cover;
+    background-position-x: right;
+    background-position-y: center;
+    height: 100%;
+    width: 70%;
+}

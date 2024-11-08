@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="x-content-type-options" content="nosniff">
     <title>LurkJS</title>
+    <link rel="stylesheet" href="src/css/log_reg_page.css">
+    <link rel="stylesheet" href="src/css/connect_page.css">
+    <link rel="stylesheet" href="src/css/lobby_page.css">
     <link rel="stylesheet" href="src/css/main.css">
     <link rel="stylesheet" href="src/css/_loading.css">
 </head>
@@ -29,6 +32,43 @@
             </svg>
         </div>
     </div>
+    <div class="content" id="con">
+        <div id="connect" style="display: flex;">
+            <div class="right-side">
+                <img src="./src/images/PizzaBlast.png">
+                <input type="text" name="serverip" id="serverip" placeholder="IP">
+                <button type="button" id="connectbtn">CONNECT</button>
+                <a id="connect_error"></a>
+            </div>
+
+            <div class="left-side-img"></div>
+        </div>
+        <div id="logreg" style="display: none;">
+            <div id="ping-logreg">PING: -1</div>
+            <div class="form">
+                <img id="logo" src="./src/images/PizzaBlast.png">
+                <div id="in">
+                    <label>Username</label>
+                    <input type="text" name="username" id="username">
+                </div>
+                <div id="in">
+                    <label>Password</label>
+                    <div id="passwrd">
+                        <input type="password" name="password" id="password">
+                        <img id="showpass" src="./eye.svg">
+                    </div>
+                </div>
+                <a id="errormsg"></a>
+                <div id="btns">
+                    <button type="button" id="registerb">REGISTER</button>
+                    <button type="button" id="loginb">LOGIN</button>
+                </div>
+
+            </div>
+            <div class="left-side-img"></div>
+        </div>
+    </div>
+
 
     <script src="src/js/main.js" type="module"></script>
     <script src="src/js/loader.js" type="module"></script>
