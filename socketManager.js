@@ -62,8 +62,11 @@ export class client {
         this.sign_error_codes = [0, 2, 3, 4, 5]
         this.publicKeyPem = undefined;
         this.profile = {
+            id: -1,
             username: "",
             tag: "",
+            coins: -1,
+            banner: 0
         }
 
         this.ping = -1
@@ -95,6 +98,7 @@ export class client {
             setInterval(() => {
                 this.send("ping")
             }, 1000)
+            
         }
         // Handle incoming messages
         this.client.onmessage = async (event) => {
@@ -107,6 +111,12 @@ export class client {
                     this.publicKeyPem = data['public-key']
                     // output an event listenr for the client to use
                     window.dispatchEvent(new Event('cwsconnected'));
+                    //! TO BE DELETED
+                    // AUTO-LOGIN
+                    this.userInput.value = "test";
+                    this.passwordInput.value = "testpassword";
+                    this.send("login")
+                    //! TO BE DELETED
                 }
 
             }
@@ -116,8 +126,6 @@ export class client {
                 this.ping = (client_timestamp - server_timestamp).toFixed(1);
             }
             else if (data.type == "sign_response") {
-                console.log(data);
-                
                 if (data.code == 1) {
                     window.dispatchEvent(new Event('cwsSignSucces'));
                 }
@@ -129,21 +137,19 @@ export class client {
                 }
 
             }
-            else if (data.type == "fetched_players") {
-                this.players_list = data.players
-                this.rank = this.players_list[this.user]["rank"]
-                this.role = this.players_list[this.user].role
-                this.other_players_list = data.players
-                delete this.other_players_list[this.user]
-                window.dispatchEvent(new Event('cwsfetchedData'));
+            else if (data.type == "profile_info") {
+                data.data = data.data.replace(/'/g, '"') //replacing all ' with " > https://stackoverflow.com/questions/41402834/convert-string-array-to-array-in-javascript
+                var profile = JSON.parse(data.data)
+                this.profile.id = profile[0]
+                this.profile.tag = profile[1]
+                this.profile.username = profile[2]
+                this.profile.coins = profile[4]
+                this.profile.banner = profile[5]                
             }
             else if (data.type == "player_update") {
                 if (data.by !== this.user) {
                     this.send("fetch_online_players")
                 }
-            }
-            else if (data.type == "players") {
-                this.players_list = data.data
             }
             else {
                 console.log('Message:', data);
@@ -152,11 +158,9 @@ export class client {
         this.client.onclose = (event) => {
             const currentUrl = new URL(window.location.href);
             if (event.reason == "" || event.reason == undefined) {
-                console.log('Disconnected: No reason');
                 currentUrl.searchParams.set("error", "Disconnected: No reason");
             }
             else {
-                console.log('Disconnected:', event.reason);
                 currentUrl.searchParams.set("error", event.reason);
             }
             window.location.href = currentUrl.toString();
@@ -182,9 +186,7 @@ export class client {
                     y: this.y
                 }
             }
-            else if (type == "register" || type == "login") {
-                console.log(this.user);
-                
+            else if (type == "register" || type == "login") {   
                 data = {
                     type: type,
                     username: String(this.userInput.value),

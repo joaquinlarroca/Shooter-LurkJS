@@ -43,6 +43,14 @@ connect_btn.addEventListener("click", () => {
     const ip = current_ip.split(":")
     gameClient = new client(ip[0], ip[1])
 })
+
+//! TO BE DELETED
+connect_errordisplay.innerText = ""
+current_ip = localStoragePlugin.set("lastIP", connect_input.value)
+const ip = current_ip.split(":")
+gameClient = new client(ip[0], ip[1])
+//! TO BE DELETED
+
 // ######################################################
 // # screen register                                    #
 // ######################################################
@@ -61,60 +69,72 @@ eyeIcon.addEventListener('mouseout', () => {
 // ######################################################
 // # SETUP AND LOOPS                                    #
 // ######################################################
-let GameScreen = "connect"
+let GameScreen = "lobby"
+function updateGameScreen(gamescreen){
+    GameScreen = gamescreen
+    switch (gamescreen) {
+        case "connect":
+            global._disable_mouse_events = true;
+            document.title = "Connect to a server"
+
+            if (canvas.style.display != "none") {
+                canvas.style.display = "none"
+            }
+            if (connect.style.display == "none") {
+                connect.style.display = "flex"
+            }
+            break;
+        case "logreg":
+            global._disable_mouse_events = true;
+            document.title = "Sign to server"
+
+
+            if (connect.style.display != "none") {
+                connect.style.display = "none"
+            }
+
+
+            if (logreg.style.display == "none") {
+                logreg.style.display = "flex"
+            }
+            break;
+        case "lobby":
+            global._disable_mouse_events = false;
+            document.title = "Lobby"
+
+            if (connect.style.display != "none") {
+                connect.style.display = "none"
+            }
+            if (canvas.style.display != "flex") {
+                canvas.style.display = "flex"
+            }
+            if (logreg.style.display != "none") {
+                logreg.style.display = "none"
+            }
+            break;
+        default:
+            break;
+    }
+}
 await setup(1920, 1080, 0.99, 60);
 
 export let partGen = new ParticleGenerator(969, 540, 2, 16, "rgba(255,255,255,0.25)", 0, 0, 1500, 1e-75)
 
 window.addEventListener("cwsconnected", () => {
-    GameScreen = "logreg"
+    updateGameScreen("logreg")
 })
 window.addEventListener("cwsSignSucces", () => {
-    GameScreen = "lobby"
+    updateGameScreen("lobby")
 })
 window.addEventListener("started", () => {
 })
 window.addEventListener("update", () => {
-
-    if (GameScreen == "connect") {
-        global._disable_mouse_events = true;
-        document.title = "Connect to a server"
-
-        if (canvas.style.display != "none") {
-            canvas.style.display = "none"
-        }
-        if (connect.style.display == "none") {
-            connect.style.display = "flex"
-        }
-    }
     if (GameScreen == "logreg") {
-        global._disable_mouse_events = true;
-        document.title = "Sign to server"
-
         logregPing.innerText = `PING: ${gameClient.ping}`
-        if (connect.style.display != "none") {
-            connect.style.display = "none"
-        }
-
-
-        if (logreg.style.display == "none") {
-            logreg.style.display = "flex"
-        }
     }
     if (GameScreen == "lobby") {
-        global._disable_mouse_events = true;
-        document.title = "Sign to server"
-
-        logregPing.innerText = `PING: ${gameClient.ping}`
-        if (connect.style.display != "none") {
-            connect.style.display = "none"
-        }
-        if (canvas.style.display != "flex") {
-            canvas.style.display = "flex"
-        }
-        if (logreg.style.display != "none") {
-            logreg.style.display = "none"
-        }
+        clear()
+        ui.lobby.draw()
     }
     if (GameScreen == "game") {
 

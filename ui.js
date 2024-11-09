@@ -97,5 +97,20 @@ export const ui = {
             ctx.fillStyle = "rgba(255,255,255,.3)"
             drawtext(`BULLETS: ${bullets.length} ENTITIES: ${entities.length}`, [1624, 994 + this.y], 18, "monospace", "top", "start", 0, 1.0)
         }
+    },
+    lobby: {
+        playBTN: new button("color: transparent", [832, 984], [256, 64], ["P L A Y", "white", 24, "sans-serif"], 1000),
+        draw() {
+            this.playBTN.draw()
+            if (this.playBTN.hovered) {
+                this.playBTN.color = "rgba(242, 89, 73, 1)"
+            }
+            else {
+                this.playBTN.color = "rgba(242, 89, 73, 0)"
+            }
+        }
     }
 }
+ui.lobby.playBTN.stroke.active = true
+ui.lobby.playBTN.stroke.width = 3
+ui.lobby.playBTN.borderRadius = 3

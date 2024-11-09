@@ -231,6 +231,11 @@ export class object {
         this.alpha = 1
 
         this.borderRadius = 0
+        this.stroke = {
+            active: false,
+            color: "#FFFFFF",
+            width: 5
+        }
     }
     collidesWith(object) {
         for (const hitboxes of this.hitboxes) {
@@ -262,6 +267,11 @@ export class object {
         screen.context.fillStyle = "rgba(0,0,0,0)"
         screen.context.beginPath();
         screen.context.roundRect(-this.width * this.offset[0], -this.height * this.offset[1], this.width, this.height, this.borderRadius);
+        if (this.stroke.active) {
+            screen.context.strokeStyle = this.stroke.color;
+            screen.context.lineWidth = this.stroke.width;
+            screen.context.stroke();
+        }
         screen.context.closePath()
         screen.context.clip()
         if (this.usingColor) {
