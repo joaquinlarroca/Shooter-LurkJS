@@ -22,7 +22,7 @@ canvas {
 :root {
     --background: #171717;
     --app-color-ligth: #eeeeee;
-    --main: rgb(242, 89, 73); /* #A9F249*/
+    --main: #A9F249; /* #A9F249*/
 
     --body-bg: var(--background);
     --canvas-bg: #181425;

@@ -8,6 +8,7 @@ import { map } from "./map.js";
 import { gun, switchGun, bullets } from "./guns.js";
 import { entities } from "./entities.js";
 
+await loadImage("./src/images/banners/banner0.png", "banner0");
 
 export const ui = {
     weapon_selector: {
@@ -99,14 +100,30 @@ export const ui = {
         }
     },
     lobby: {
-        playBTN: new button("color: transparent", [832, 984], [256, 64], ["P L A Y", "white", 24, "sans-serif"], 1000),
+        playBTN: new button("color: transparent", [832, 984], [256, 64], ["P L A Y", "white", 26, "sans-serif"], 1000),
+        banner: new object(image["banner0"], [810, 277], [300, 675]),
         draw() {
             this.playBTN.draw()
+            this.banner.draw()
+            ctx.fillStyle = "rgb(24,24,24)"
+            ctx.beginPath();
+            ctx.roundRect(32, 32, 746, 1016, 3);
+            ctx.fill()
+
+            
+
+
             if (this.playBTN.hovered) {
-                this.playBTN.color = "rgba(242, 89, 73, 1)"
+                this.playBTN.mycolor = lerp(this.playBTN.mycolor, 1, (1 ** time.deltaTime) * 0.1 * time.scale)
+                this.playBTN.stroke.color = `rgba(255, 255, 255, ${1 - this.playBTN.mycolor})`
+                this.playBTN.color = `rgba(255, 255, 255, ${this.playBTN.mycolor})`
+                this.playBTN.text.color = "rgb(17, 17, 17)"
             }
             else {
-                this.playBTN.color = "rgba(242, 89, 73, 0)"
+                this.playBTN.mycolor = lerp(this.playBTN.mycolor, 0, (1 ** time.deltaTime) * 0.1 * time.scale)
+                this.playBTN.stroke.color = `rgba(255, 255, 255, ${1 - this.playBTN.mycolor})`
+                this.playBTN.color = `rgba(255, 255, 255, ${this.playBTN.mycolor})`
+                this.playBTN.text.color = "rgb(255, 255, 255)"
             }
         }
     }
@@ -114,3 +131,5 @@ export const ui = {
 ui.lobby.playBTN.stroke.active = true
 ui.lobby.playBTN.stroke.width = 3
 ui.lobby.playBTN.borderRadius = 3
+ui.lobby.playBTN.mycolor = 0
+ui.lobby.banner.borderRadius = 3

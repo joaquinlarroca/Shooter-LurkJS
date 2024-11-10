@@ -48,7 +48,10 @@ connect_btn.addEventListener("click", () => {
 connect_errordisplay.innerText = ""
 current_ip = localStoragePlugin.set("lastIP", connect_input.value)
 const ip = current_ip.split(":")
-gameClient = new client(ip[0], ip[1])
+setTimeout(() => {
+    gameClient = new client(ip[0], ip[1])
+}, 100)
+
 //! TO BE DELETED
 
 // ######################################################
@@ -70,7 +73,7 @@ eyeIcon.addEventListener('mouseout', () => {
 // # SETUP AND LOOPS                                    #
 // ######################################################
 let GameScreen = "lobby"
-function updateGameScreen(gamescreen){
+function updateGameScreen(gamescreen) {
     GameScreen = gamescreen
     switch (gamescreen) {
         case "connect":
@@ -134,7 +137,14 @@ window.addEventListener("update", () => {
     }
     if (GameScreen == "lobby") {
         clear()
+
+        ctx.fillStyle = "rgba(17,17,17,1)"
+        ctx.fillRect(0, 0, 1920, 1080)
+
         ui.lobby.draw()
+        ctx.fillStyle = "rgb(255,255,255)"
+        drawtext(`PING: ${gameClient.ping}ms`, [960, 32], 20, "sans-serif", "top", "center", 0, 1)
+        drawtext(`FPS: ${global.fps}`, [960, 52], 20, "sans-serif", "top", "center", 0, 1)
     }
     if (GameScreen == "game") {
 
