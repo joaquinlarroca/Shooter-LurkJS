@@ -17,7 +17,7 @@ import { chunker, chunker_config } from "./chunker.js";
 import { bullet_decay, drawBulletDecay, updateEntities } from "./entities.js";
 import { crosshair, crosshairAngle, updateCrosshair } from "./crosshair.js";
 
-let gameClient;
+export let gameClient;
 const urlParams = new URLSearchParams(window.location.search);
 
 const errorValue = urlParams.get("error");
@@ -145,6 +145,7 @@ window.addEventListener("update", () => {
         ctx.fillStyle = "rgb(255,255,255)"
         drawtext(`PING: ${gameClient.ping}ms`, [960, 32], 20, "sans-serif", "top", "center", 0, 1)
         drawtext(`FPS: ${global.fps}`, [960, 52], 20, "sans-serif", "top", "center", 0, 1)
+        drawtext(mouse.x.toFixed(0) + ", " + mouse.y.toFixed(0), [0, 0], 20, "sans-serif", "top", "left", 0, 1)
     }
     if (GameScreen == "game") {
 

@@ -68,6 +68,22 @@ export class client {
             coins: -1,
             banner: 0
         }
+        this.gameData = {
+            "wait_to_start": false,
+            "current_time":0,
+            "started_time": 0,
+        }
+        this.game = {
+            "map": 0,
+            "mode": 0,
+            "players": [],
+            "teams": false,
+            "team_a": [],
+            "team_b": [],
+            "time": 0,
+            "reset_time": 0,
+            "team_score": [0, 0]
+        }
 
         this.ping = -1
 
@@ -98,7 +114,7 @@ export class client {
             setInterval(() => {
                 this.send("ping")
             }, 1000)
-            
+
         }
         // Handle incoming messages
         this.client.onmessage = async (event) => {
@@ -123,7 +139,7 @@ export class client {
             else if (data.type == "pong") {
                 const client_timestamp = Date.now();  // Accurate timestamp in milliseconds
                 const server_timestamp = data.data;
-                this.ping = (client_timestamp - server_timestamp).toFixed(1);
+                this.ping = Math.max((client_timestamp - server_timestamp).toFixed(1), 0);
             }
             else if (data.type == "sign_response") {
                 if (data.code == 1) {
@@ -144,12 +160,24 @@ export class client {
                 this.profile.tag = profile[1]
                 this.profile.username = profile[2]
                 this.profile.coins = profile[4]
-                this.profile.banner = profile[5]                
+                this.profile.banner = profile[5]
             }
-            else if (data.type == "player_update") {
-                if (data.by !== this.user) {
-                    this.send("fetch_online_players")
+            else if (data.type == "game_response") {
+                if (data.code == 1) {
+                    this.gameData.wait_to_start = true;
                 }
+                else {
+                    console.log(`Unknown Error ${data.code}: ${data.data}`)
+                }
+            }
+            else if (data.type == "game_info") {
+                data.data = data.data.replace(/'/g, '"') //replacing all ' with " > https://stackoverflow.com/questions/41402834/convert-string-array-to-array-in-javascript
+                data.data = data.data.replace("False", "false")
+                var gameData = JSON.parse(data.data)
+                this.game = gameData
+                this.gameData.started_time = Date.now()
+
+
             }
             else {
                 console.log('Message:', data);
@@ -186,7 +214,7 @@ export class client {
                     y: this.y
                 }
             }
-            else if (type == "register" || type == "login") {   
+            else if (type == "register" || type == "login") {
                 data = {
                     type: type,
                     username: String(this.userInput.value),
@@ -198,6 +226,14 @@ export class client {
                     type: type,
                 }
             }
+            else if (type == "enter_game") {
+                data = {
+                    type: type,
+                    username: this.profile.username,
+                }
+            }
+
+
 
             this.client.send(JSON.stringify(data));
         }

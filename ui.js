@@ -2,11 +2,12 @@ import { global, screen, ctx, canvas, time, image } from "./src/js/main.js";
 import { drawPointers, isClicking, isHovering, keyPressed, mouse, pointers } from "./src/js/listeners.js";
 import { button, camera, hitbox, hitboxCircleFixed, hitboxFixed, object, slider, sliderv, sound2, sound } from "./src/js/classes.js";
 import { loadFont, loadImage, loadSound } from "./src/js/loader.js";
-import { setup, clear, drawtext, shakeScreen, lerp } from "./src/js/functions.js";
+import { setup, clear, drawtext, shakeScreen, lerp, getTimeElapsed } from "./src/js/functions.js";
 import { player } from "./player.js";
 import { map } from "./map.js";
 import { gun, switchGun, bullets } from "./guns.js";
 import { entities } from "./entities.js";
+import { gameClient } from "./game.js";
 
 await loadImage("./src/images/banners/banner0.png", "banner0");
 
@@ -101,29 +102,41 @@ export const ui = {
     },
     lobby: {
         playBTN: new button("color: transparent", [832, 984], [256, 64], ["P L A Y", "white", 26, "sans-serif"], 1000),
-        banner: new object(image["banner0"], [810, 277], [300, 675]),
+        timer: new button("color: white", [896, 952], [128, 48], ["0:33", "black", 22, "sans-serif"], 0),
+        banner: new object(image["banner0"], [810, 202.5], [300, 675]),
         draw() {
+            this.timer.draw()
             this.playBTN.draw()
             this.banner.draw()
+
             ctx.fillStyle = "rgb(24,24,24)"
             ctx.beginPath();
             ctx.roundRect(32, 32, 746, 1016, 3);
             ctx.fill()
 
-            
 
-
-            if (this.playBTN.hovered) {
+            this.playBTN.stroke.color = `rgba(255, 255, 255, ${1 - this.playBTN.mycolor})`
+            this.playBTN.color = `rgba(255, 255, 255, ${this.playBTN.mycolor})`
+            this.timer.alpha = lerp(this.timer.alpha, this.playBTN.mycolor * gameClient.gameData.wait_to_start, (1 ** time.deltaTime) * 0.1 * time.scale)
+            if (gameClient.gameData.wait_to_start) {
                 this.playBTN.mycolor = lerp(this.playBTN.mycolor, 1, (1 ** time.deltaTime) * 0.1 * time.scale)
-                this.playBTN.stroke.color = `rgba(255, 255, 255, ${1 - this.playBTN.mycolor})`
-                this.playBTN.color = `rgba(255, 255, 255, ${this.playBTN.mycolor})`
-                this.playBTN.text.color = "rgb(17, 17, 17)"
+                this.timer.text.text = gameClient.gameData.current_time
+                gameClient.gameData.current_time = getTimeElapsed(gameClient.gameData.started_time)
+                this.playBTN.text.text = "W A I T I N G"
             }
             else {
-                this.playBTN.mycolor = lerp(this.playBTN.mycolor, 0, (1 ** time.deltaTime) * 0.1 * time.scale)
-                this.playBTN.stroke.color = `rgba(255, 255, 255, ${1 - this.playBTN.mycolor})`
-                this.playBTN.color = `rgba(255, 255, 255, ${this.playBTN.mycolor})`
-                this.playBTN.text.color = "rgb(255, 255, 255)"
+
+                if (this.playBTN.clicked) {
+                    gameClient.send("enter_game")
+                }
+                if (this.playBTN.hovered) {
+                    this.playBTN.mycolor = lerp(this.playBTN.mycolor, 1, (1 ** time.deltaTime) * 0.1 * time.scale)
+                    this.playBTN.text.color = "rgb(17, 17, 17)"
+                }
+                else {
+                    this.playBTN.mycolor = lerp(this.playBTN.mycolor, 0, (1 ** time.deltaTime) * 0.1 * time.scale)
+                    this.playBTN.text.color = "rgb(255, 255, 255)"
+                }
             }
         }
     }
@@ -132,4 +145,5 @@ ui.lobby.playBTN.stroke.active = true
 ui.lobby.playBTN.stroke.width = 3
 ui.lobby.playBTN.borderRadius = 3
 ui.lobby.playBTN.mycolor = 0
+ui.lobby.timer.borderRadius = 3
 ui.lobby.banner.borderRadius = 3

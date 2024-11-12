@@ -140,3 +140,19 @@ export function isValidColor(color) {
     validate.color = color;
     return validate.color !== '';
 }
+
+export function getTimeElapsed(startTime) {
+    const now = Date.now();
+    const elapsed = now - startTime;
+    
+
+    // Calculate minutes and seconds
+    const minutes = Math.floor(elapsed / (1000 * 60));
+    const seconds = Math.floor((elapsed % (1000 * 60)) / 1000);
+
+    // Format output for readability (optional)
+    const formattedMinutes = minutes.toString().padStart(2, '0');
+    const formattedSeconds = seconds.toString().padStart(2, '0');
+
+    return `${formattedMinutes}:${formattedSeconds}`;
+}
