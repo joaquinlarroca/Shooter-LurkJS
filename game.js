@@ -2,7 +2,7 @@ import { global, screen, ctx, canvas, time, image } from "./src/js/main.js";
 import { drawPointers, isClicking, isHovering, keyPressed, mouse, pointers } from "./src/js/listeners.js";
 import { button, camera, hitbox, hitboxCircleFixed, hitboxFixed, object, slider, sliderv } from "./src/js/classes.js";
 import { loadFont, loadImage } from "./src/js/loader.js";
-import { setup, clear, drawtext, shakeScreen, lerp } from "./src/js/functions.js";
+import { setup, clear, drawtext, shakeScreen, lerp, lerpAngle } from "./src/js/functions.js";
 import { animatePlayer, player } from "./player.js";
 import { map } from "./map.js";
 import { ParticleGenerator } from "./src/plugins/particles/particles.js";
@@ -39,18 +39,18 @@ let current_ip = localStoragePlugin.get("ip") || "127.0.0.1:443";
 connect_input.value = current_ip
 connect_btn.addEventListener("click", () => {
     connect_errordisplay.innerText = ""
-    current_ip = localStoragePlugin.set("lastIP", connect_input.value)
+    current_ip = localStoragePlugin.set("ip", connect_input.value)
     const ip = current_ip.split(":")
     gameClient = new client(ip[0], ip[1])
 })
 
 //! TO BE DELETED
-connect_errordisplay.innerText = ""
-current_ip = localStoragePlugin.set("lastIP", connect_input.value)
-const ip = current_ip.split(":")
-setTimeout(() => {
-    gameClient = new client(ip[0], ip[1])
-}, 100)
+//connect_errordisplay.innerText = ""
+//current_ip = localStoragePlugin.set("ip", connect_input.value)
+//const ip = current_ip.split(":")
+//setTimeout(() => {
+//    gameClient = new client(ip[0], ip[1])
+//}, 100)
 
 //! TO BE DELETED
 
@@ -72,7 +72,8 @@ eyeIcon.addEventListener('mouseout', () => {
 // ######################################################
 // # SETUP AND LOOPS                                    #
 // ######################################################
-let GameScreen = "lobby"
+let GameScreen = "connect"
+updateGameScreen(GameScreen)
 function updateGameScreen(gamescreen) {
     GameScreen = gamescreen
     switch (gamescreen) {
@@ -115,6 +116,21 @@ function updateGameScreen(gamescreen) {
                 logreg.style.display = "none"
             }
             break;
+        case "game":
+            global._disable_mouse_events = false;
+            document.title = "Game"
+
+            if (connect.style.display != "none") {
+                connect.style.display = "none"
+            }
+            if (canvas.style.display != "flex") {
+                canvas.style.display = "flex"
+            }
+            if (logreg.style.display != "none") {
+                logreg.style.display = "none"
+            }
+            break;
+
         default:
             break;
     }
@@ -128,6 +144,9 @@ window.addEventListener("cwsconnected", () => {
 })
 window.addEventListener("cwsSignSucces", () => {
     updateGameScreen("lobby")
+})
+window.addEventListener("cwsGameSucces", () => {
+    updateGameScreen("game")
 })
 window.addEventListener("started", () => {
 })
@@ -161,6 +180,35 @@ window.addEventListener("update", () => {
 
         drawBulletDecay()
         drawBullets()
+
+        for (const key in gameClient.other_players_list) {
+            var p = gameClient.other_players_list[key]
+            var oldP = gameClient.old_other_players_list[key] || p
+            p.x = Number(p.x)
+            p.y = Number(p.y)
+            p.direction = Number(p.direction)
+            p.x = lerp(oldP.x, p.x, (1 ** time.deltaTime))
+            p.y = lerp(oldP.y, p.y, (1 ** time.deltaTime))
+            //p.direction = lerp(oldP.direction, p.direction, (1 ** time.deltaTime))
+            p.direction = lerpAngle(oldP.direction, p.direction, (1 ** time.deltaTime) * 0.5)
+
+            p.x += Number(p.vx) * time.deltaTime * time.scale
+            p.y += Number(p.vy) * time.deltaTime * time.scale
+
+            p.x += 930;
+            p.y += 497.5;
+            ctx.fillStyle = "rgba(255,255,255,1)"
+            drawtext(p.name, [p.x + 30, p.y - 20], 20, "sans-serif", "top", "center", 0, 1)
+
+            ctx.fillStyle = "red"
+            ctx.fillRect(p.x, p.y, 60, 85)
+            ctx.fillStyle = "rgba(255,255,255,1)"
+            drawtext("██████", [p.x + 30, p.y + 42.5], 20, "sans-serif", "middle", "start", p.direction, 1)
+            p.x -= 930
+            p.y -= 497.5
+
+            gameClient.old_other_players_list[key] = { x: p.x, y: p.y, direction: p.direction }
+        };
 
         ctx.restore()
         // #############
@@ -363,3 +411,8 @@ window.addEventListener("fixedUpdate", () => {
         map.y = Math.round(Math.max(Math.min(map.y, map.max.y), map.min.y));
     }
 })
+let sendDAT = setInterval(() => {
+    if (GameScreen == "game") {
+        gameClient.send("receive_packet", { x: map.x.toFixed(3), y: map.y.toFixed(3), vx: map.vel.x.toFixed(3), vy: map.vel.y.toFixed(3), direction: gun.angle.toFixed(0) })
+    }
+}, 10)

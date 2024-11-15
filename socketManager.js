@@ -66,17 +66,22 @@ export class client {
             username: "",
             tag: "",
             coins: -1,
-            banner: 0
+            banner: 0,
+            x: 0,
+            y: 0,
+            vx: 0,
+            vy: 0,
+            direction: 0
         }
         this.gameData = {
             "wait_to_start": false,
-            "current_time":0,
+            "current_time": 0,
             "started_time": 0,
         }
         this.game = {
             "map": 0,
             "mode": 0,
-            "players": [],
+            "players": {},
             "teams": false,
             "team_a": [],
             "team_b": [],
@@ -94,8 +99,8 @@ export class client {
 
         this.gamemode = 0
 
-        this.players_list = {}
         this.other_players_list = {}
+        this.old_other_players_list = {}
 
         this.displayError = document.getElementById("errormsg");
         this.userInput = document.getElementById('username');
@@ -119,7 +124,27 @@ export class client {
         // Handle incoming messages
         this.client.onmessage = async (event) => {
             var data = JSON.parse(event.data)
-            if (data.type == "server") {
+            if (data.type == "packet") {
+                data.data = data.data.replace(/'/g, '"') //replacing all ' with " > https://stackoverflow.com/questions/41402834/convert-string-array-to-array-in-javascript
+                var players = JSON.parse(data.data)
+
+                if (players[`${this.profile.id}`]["name"] == this.profile.username) {
+                    this.profile.x = Number(players[`${this.profile.id}`].x)
+                    this.profile.y = Number(players[`${this.profile.id}`].y)
+                    this.profile.vx = Number(players[`${this.profile.id}`].vx)
+                    this.profile.vy = Number(players[`${this.profile.id}`].vy)
+                    this.profile.direction = Number(players[`${this.profile.id}`].direction)
+                    //delete players[`${this.profile.id}`]
+                    this.other_players_list = players
+
+                }
+                else {
+                    this.client.close(1000, "Invalid packet");
+                }
+
+
+            }
+            else if (data.type == "server") {
                 if (data.version != this.clientVersion) {
                     this.client.close(1000, `Client version ${this.clientVersion} does not match server version ${data.version}`);
                 }
@@ -129,9 +154,9 @@ export class client {
                     window.dispatchEvent(new Event('cwsconnected'));
                     //! TO BE DELETED
                     // AUTO-LOGIN
-                    this.userInput.value = "test";
+                    this.userInput.value = Math.random().toString(15).substring(10);
                     this.passwordInput.value = "testpassword";
-                    this.send("login")
+                    this.send("register")
                     //! TO BE DELETED
                 }
 
@@ -165,6 +190,7 @@ export class client {
             else if (data.type == "game_response") {
                 if (data.code == 1) {
                     this.gameData.wait_to_start = true;
+                    window.dispatchEvent(new Event('cwsGameSucces'));
                 }
                 else {
                     console.log(`Unknown Error ${data.code}: ${data.data}`)
@@ -203,15 +229,17 @@ export class client {
             window.location.href = currentUrl.toString();
         };
     }
-    async send(type) {
+    async send(type, info = {}) {
         if (this.client.readyState == 1) {
             let data = {}
-            if (type == "pos") {
+            if (type == "receive_packet") {
                 data = {
                     type: type,
-                    username: this.user,
-                    x: this.x,
-                    y: this.y
+                    x: info.x,
+                    y: info.y,
+                    vx: info.vx,
+                    vy: info.vy,
+                    direction: info.direction
                 }
             }
             else if (type == "register" || type == "login") {
@@ -232,9 +260,11 @@ export class client {
                     username: this.profile.username,
                 }
             }
-
-
-
+            else if (type == "join") {
+                data = {
+                    type: type,
+                }
+            }
             this.client.send(JSON.stringify(data));
         }
     }

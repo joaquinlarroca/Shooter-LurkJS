@@ -102,7 +102,7 @@ export const ui = {
     },
     lobby: {
         playBTN: new button("color: transparent", [832, 984], [256, 64], ["P L A Y", "white", 26, "sans-serif"], 1000),
-        timer: new button("color: white", [896, 952], [128, 48], ["0:33", "black", 22, "sans-serif"], 0),
+        timer: new button("color: white", [896, 952], [128, 32], ["0:33", "black", 22, "sans-serif"], 0),
         banner: new object(image["banner0"], [810, 202.5], [300, 675]),
         draw() {
             this.timer.draw()
@@ -128,6 +128,7 @@ export const ui = {
 
                 if (this.playBTN.clicked) {
                     gameClient.send("enter_game")
+                    gameClient.send("join")
                 }
                 if (this.playBTN.hovered) {
                     this.playBTN.mycolor = lerp(this.playBTN.mycolor, 1, (1 ** time.deltaTime) * 0.1 * time.scale)
@@ -145,5 +146,5 @@ ui.lobby.playBTN.stroke.active = true
 ui.lobby.playBTN.stroke.width = 3
 ui.lobby.playBTN.borderRadius = 3
 ui.lobby.playBTN.mycolor = 0
-ui.lobby.timer.borderRadius = 3
+ui.lobby.timer.borderRadius = [3, 3, 0, 0]
 ui.lobby.banner.borderRadius = 3
