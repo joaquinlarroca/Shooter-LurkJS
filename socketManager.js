@@ -61,6 +61,10 @@ export class client {
         this.clientVersion = "1.0"
         this.sign_error_codes = [0, 2, 3, 4, 5]
         this.publicKeyPem = undefined;
+        this.packet = {
+            vx: 0,
+            vy: 0
+        }
         this.profile = {
             id: -1,
             username: "",

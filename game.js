@@ -3,7 +3,7 @@ import { drawPointers, isClicking, isHovering, keyPressed, mouse, pointers } fro
 import { button, camera, hitbox, hitboxCircleFixed, hitboxFixed, object, slider, sliderv } from "./src/js/classes.js";
 import { loadFont, loadImage } from "./src/js/loader.js";
 import { setup, clear, drawtext, shakeScreen, lerp, lerpAngle } from "./src/js/functions.js";
-import {  player } from "./player.js";
+import { player } from "./player.js";
 import { map } from "./map.js";
 import { ParticleGenerator } from "./src/plugins/particles/particles.js";
 import { localStoragePlugin } from "./src/plugins/localStorage/ls.js";
@@ -186,14 +186,16 @@ window.addEventListener("update", () => {
             var oldP = gameClient.old_other_players_list[key] || p
             p.x = Number(p.x)
             p.y = Number(p.y)
-            p.vx = Number(p.vx)
-            p.vy = Number(p.vy)
+            p.vx = 0 || Number(p.vx)
+            p.vy = 0 || Number(p.vy)
             p.direction = Number(p.direction)
-            p.x = lerp(oldP.x, p.x, (1 ** time.deltaTime))
-            p.y = lerp(oldP.y, p.y, (1 ** time.deltaTime))
-            
+
+
+            p.x = lerp(oldP.x, p.x, (1 ** time.deltaTime) * 0.1)
+            p.y = lerp(oldP.y, p.y, (1 ** time.deltaTime) * 0.1)
+
             //p.direction = lerp(oldP.direction, p.direction, (1 ** time.deltaTime))
-            p.direction = lerpAngle(oldP.direction, p.direction, (1 ** time.deltaTime))
+            p.direction = lerpAngle(oldP.direction, p.direction, (1 ** time.deltaTime) * 0.5)
 
             p.x += p.vx * time.deltaTime * time.scale
             p.y += p.vy * time.deltaTime * time.scale
@@ -203,12 +205,14 @@ window.addEventListener("update", () => {
             ctx.fillStyle = "rgba(255,255,255,1)"
             drawtext(p.name, [p.x + player.halfwidth, p.y - 20], 20, "sans-serif", "top", "center", 0, 1)
 
-            ctx.fillStyle = "red"
-            ctx.fillRect(p.x, p.y, 85, 85)
+            ctx.fillStyle = "rgba(255,0,0,0.5)"
+            ctx.drawImage(image["peperoni"], p.x, p.y, 85, 85)
+
             ctx.fillStyle = "rgba(255,255,255,1)"
-            drawtext("██████", [p.x +  42.5, p.y + 42.5], 20, "sans-serif", "middle", "start", p.direction, 1)
+            drawtext("██████", [p.x + 42.5, p.y + 42.5], 20, "sans-serif", "middle", "start", p.direction, 0.5)
             p.x -= 960 - player.halfwidth;
             p.y -= 540 - player.halfheight;
+
 
             gameClient.old_other_players_list[key] = { x: p.x, y: p.y, direction: p.direction }
         };
@@ -219,9 +223,9 @@ window.addEventListener("update", () => {
         // #############
         player.draw()
 
-        player.hitboxes[2].x = player.x + player.halfwidth
-        player.hitboxes[2].y = player.y  + player.halfheight
-        player.hitboxes[2].draw()
+        //player.hitboxes[2].x = player.x + player.halfwidth
+        //player.hitboxes[2].y = player.y  + player.halfheight
+        //player.hitboxes[2].draw()
 
         gunDraw()
 
@@ -257,6 +261,7 @@ window.addEventListener("update", () => {
         drawtext("World: " + (map.x + mouse.x).toFixed(0) + ", " + (map.y + mouse.y).toFixed(0), [0, 0], 24, "sans-serif", "top", "start", 0, 1.0)
         drawtext("Player: " + (map.x + mouse.x - screen.canvas.width / 2).toFixed(0) + ", " + (map.y + mouse.y - screen.canvas.height / 2).toFixed(0), [0, 24], 24, "sans-serif", "top", "start", 0, 1.0)
         drawtext("Chunk: " + (((chunker.chunk.x * chunker_config["size"]) + mouse.x - screen.canvas.width / 2 + player.halfwidth) % chunker_config["size"]).toFixed(0) + ", " + (((chunker.chunk.y * chunker_config["size"]) + mouse.y - screen.canvas.height / 2 + player.halfheight) % chunker_config["size"]).toFixed(0), [0, 48], 24, "sans-serif", "top", "start", 0, 1.0)
+        drawtext("PING: " + gameClient.ping, [0, 1080 - 24], 24, "sans-serif", "top", "start", 0, 1.0)
     }
 
 });
@@ -264,6 +269,29 @@ window.addEventListener("update", () => {
 window.addEventListener("fixedUpdate", () => {
     if (GameScreen == "game") {
         partGen.update()
+        map.vector.x = keyPressed("a") - keyPressed("d");
+        map.vector.y = keyPressed("w") - keyPressed("s");
+
+        if (map.vector.x != 0 && map.vector.y != 0) {
+            map.currentVelocity = 0.707106781187 * map.velocity;
+        }
+        else {
+            map.currentVelocity = map.velocity;
+        }
+        if (map.vector.x == 1) {
+            map.vel.x -= map.currentVelocity * time.fixedDeltaTime * time.scale;
+        }
+        if (map.vector.x == -1) {
+            map.vel.x += map.currentVelocity * time.fixedDeltaTime * time.scale;
+        }
+
+        if (map.vector.y == 1) {
+            map.vel.y -= map.currentVelocity * time.fixedDeltaTime * time.scale;
+        }
+
+        if (map.vector.y == -1) {
+            map.vel.y += map.currentVelocity * time.fixedDeltaTime * time.scale;
+        }
         // ############################
         //CHUNKER
         // ############################
@@ -324,7 +352,7 @@ window.addEventListener("fixedUpdate", () => {
                         }
                         player.hitboxes[1].y -= player.halfheight / 2;
                         player.hitboxes[1].height += player.halfheight;
-                        map.vel.x = lerp(map.vel.x, 0, (1 ** time.fixedDeltaTime) * time.scale * 0.2)
+                        map.vel.x = 0
                     }
                     if (player.hitboxes[1].collide(hitbox)) {
                         while (player.hitboxes[1].collide(hitbox)) {
@@ -336,7 +364,8 @@ window.addEventListener("fixedUpdate", () => {
                 }
             }
         }
-
+        gameClient.vx = map.vel.x
+        gameClient.vy = map.vel.y
         // ############################
         // GUNS
         // ############################
@@ -377,29 +406,7 @@ window.addEventListener("fixedUpdate", () => {
         // ############################
         // MAP
         // ############################
-        map.vector.x = keyPressed("a") - keyPressed("d");
-        map.vector.y = keyPressed("w") - keyPressed("s");
-
-        if (map.vector.x != 0 && map.vector.y != 0) {
-            map.currentVelocity = 0.707106781187 * map.velocity;
-        }
-        else {
-            map.currentVelocity = map.velocity;
-        }
-        if (map.vector.x == 1) {
-            map.vel.x -= map.currentVelocity * time.fixedDeltaTime * time.scale;
-        }
-        if (map.vector.x == -1) {
-            map.vel.x += map.currentVelocity * time.fixedDeltaTime * time.scale;
-        }
-
-        if (map.vector.y == 1) {
-            map.vel.y -= map.currentVelocity * time.fixedDeltaTime * time.scale;
-        }
-
-        if (map.vector.y == -1) {
-            map.vel.y += map.currentVelocity * time.fixedDeltaTime * time.scale;
-        }
+        
 
 
         map.vel.x *= Math.pow(0.03, time.fixedDeltaTime);
@@ -415,6 +422,6 @@ window.addEventListener("fixedUpdate", () => {
 })
 let sendDAT = setInterval(() => {
     if (GameScreen == "game") {
-        gameClient.send("receive_packet", { x: map.x.toFixed(3), y: map.y.toFixed(3), vx: map.vel.x.toFixed(3), vy: map.vel.y.toFixed(3), direction: gun.angle.toFixed(0) })
+        gameClient.send("receive_packet", { x: map.x.toFixed(3), y: map.y.toFixed(3), vx: gameClient.vx.toFixed(3), vy: gameClient.vy.toFixed(3), direction: gun.angle.toFixed(0) })
     }
-}, 10)
+}, 100)
