@@ -3,7 +3,7 @@ import { drawPointers, isClicking, isHovering, keyPressed, mouse, pointers } fro
 import { button, camera, hitbox, hitboxCircleFixed, hitboxFixed, object, slider, sliderv } from "./src/js/classes.js";
 import { loadFont, loadImage } from "./src/js/loader.js";
 import { setup, clear, drawtext, shakeScreen, lerp, lerpAngle } from "./src/js/functions.js";
-import { animatePlayer, player } from "./player.js";
+import {  player } from "./player.js";
 import { map } from "./map.js";
 import { ParticleGenerator } from "./src/plugins/particles/particles.js";
 import { localStoragePlugin } from "./src/plugins/localStorage/ls.js";
@@ -186,26 +186,29 @@ window.addEventListener("update", () => {
             var oldP = gameClient.old_other_players_list[key] || p
             p.x = Number(p.x)
             p.y = Number(p.y)
+            p.vx = Number(p.vx)
+            p.vy = Number(p.vy)
             p.direction = Number(p.direction)
             p.x = lerp(oldP.x, p.x, (1 ** time.deltaTime))
             p.y = lerp(oldP.y, p.y, (1 ** time.deltaTime))
+            
             //p.direction = lerp(oldP.direction, p.direction, (1 ** time.deltaTime))
-            p.direction = lerpAngle(oldP.direction, p.direction, (1 ** time.deltaTime) * 0.5)
+            p.direction = lerpAngle(oldP.direction, p.direction, (1 ** time.deltaTime))
 
-            p.x += Number(p.vx) * time.deltaTime * time.scale
-            p.y += Number(p.vy) * time.deltaTime * time.scale
+            p.x += p.vx * time.deltaTime * time.scale
+            p.y += p.vy * time.deltaTime * time.scale
 
-            p.x += 930;
-            p.y += 497.5;
+            p.x += 960 - player.halfwidth;
+            p.y += 540 - player.halfheight;
             ctx.fillStyle = "rgba(255,255,255,1)"
-            drawtext(p.name, [p.x + 30, p.y - 20], 20, "sans-serif", "top", "center", 0, 1)
+            drawtext(p.name, [p.x + player.halfwidth, p.y - 20], 20, "sans-serif", "top", "center", 0, 1)
 
             ctx.fillStyle = "red"
-            ctx.fillRect(p.x, p.y, 60, 85)
+            ctx.fillRect(p.x, p.y, 85, 85)
             ctx.fillStyle = "rgba(255,255,255,1)"
-            drawtext("██████", [p.x + 30, p.y + 42.5], 20, "sans-serif", "middle", "start", p.direction, 1)
-            p.x -= 930
-            p.y -= 497.5
+            drawtext("██████", [p.x +  42.5, p.y + 42.5], 20, "sans-serif", "middle", "start", p.direction, 1)
+            p.x -= 960 - player.halfwidth;
+            p.y -= 540 - player.halfheight;
 
             gameClient.old_other_players_list[key] = { x: p.x, y: p.y, direction: p.direction }
         };
@@ -214,12 +217,11 @@ window.addEventListener("update", () => {
         // #############
         // END
         // #############
-        animatePlayer();
         player.draw()
 
-        //player.hitboxes[1].x = player.x
-        //player.hitboxes[1].y = player.y + player.height * 0.5
-        //player.hitboxes[1].draw()
+        player.hitboxes[2].x = player.x + player.halfwidth
+        player.hitboxes[2].y = player.y  + player.halfheight
+        player.hitboxes[2].draw()
 
         gunDraw()
 
